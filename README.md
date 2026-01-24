@@ -10,7 +10,7 @@
 * **Análisis de Ganancia:** Sugerencia automática de PVP (Precio de Venta al Público) basado en márgenes configurables.
 
 ## 🛠️ Stack Tecnológico
-* **Framework:** Laravel 11
+* **Framework:** Laravel 12
 * **Reactividad:** Livewire 3
 * **Estilos:** Tailwind CSS
 * **Componentes:** Flux UI (Standard)
