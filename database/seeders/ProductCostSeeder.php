@@ -324,14 +324,5 @@ class ProductCostSeeder extends Seeder
                 ['company_id' => $company->id]
             );
         }
-
-        // 9. Cliente de ejemplo
-        Client::updateOrCreate(
-            ['company_id' => $company->id, 'name' => 'Cliente Ejemplo'],
-            [
-                'type' => 'minorista',
-                'company_id' => $company->id,
-            ]
-        );
     }
 }
