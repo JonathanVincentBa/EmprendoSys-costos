@@ -27,25 +27,16 @@
                     :current="request()->routeIs('product.wizard')" wire:navigate>
                     {{ __('Asistente Maestro') }}
                 </flux:sidebar.item>
-
-                <flux:sidebar.item icon="calculator" :href="route('cost-calculator')"
-                    :current="request()->routeIs('cost-calculator')" wire:navigate>
-                    {{ __('Calculadora de Costos') }}
-                </flux:sidebar.item>
                 
                 <flux:sidebar.item icon="document-text" :href="route('products.index')"
                     :current="request()->routeIs('products.*')" wire:navigate>
                     {{ __('Productos') }}
                 </flux:sidebar.item>
                 
-                <flux:sidebar.item icon="beaker" :href="route('recipes.index')"
-                    :current="request()->routeIs('recipes.*')" wire:navigate>
-                    {{ __('Recetas') }}
-                </flux:sidebar.item>
             </flux:sidebar.group>
 
             <flux:sidebar.group :heading="__('Ventas')" class="grid">
-                <flux:sidebar.item icon="shopping-bag" :href="route('sales.index')"
+                <flux:sidebar.item icon="shopping-bag" :href="route('sales.pos')"
                     :current="request()->routeIs('sales.*')" wire:navigate>
                     {{ __('Órdenes de Venta') }}
                 </flux:sidebar.item>

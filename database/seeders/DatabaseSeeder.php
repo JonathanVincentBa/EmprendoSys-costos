@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ProductCostSeeder::class,
+            CustomerSeeder::class, // Añade esta línea
             UserSeeder::class,
         ]);
     }
