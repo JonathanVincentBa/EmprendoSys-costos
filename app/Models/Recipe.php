@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class Recipe extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = ['company_id', 'product_id', 'description', 'batch_size_ml'];
 
     public function company()

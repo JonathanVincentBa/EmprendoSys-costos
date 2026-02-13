@@ -23,13 +23,27 @@ class PackagingMaterials extends Component
 
     public function render()
     {
-        $packagings = PackagingMaterial::where('company_id', Auth::user()->company_id)
-            ->where(function($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('code', 'like', '%' . $this->search . '%');
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // 1. Iniciamos el Query Builder (SIN ejecutar all())
+        $query = PackagingMaterial::query();
+
+        // 2. Filtro Multi-tenant (Seguridad)
+        if (!$user->hasRole('super-admin')) {
+            $query->where('company_id', $user->company_id);
+        }
+
+        // 3. Filtro de búsqueda (Si existe el campo search)
+        if (!empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('code', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // 4. Ordenar y Paginación (Ahora sí funcionará)
+        $packagings = $query->latest()->paginate(10);
 
         return view('livewire.catalogos.packaging-materials', [
             'packagings' => $packagings

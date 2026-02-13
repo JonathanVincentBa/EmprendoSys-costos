@@ -26,10 +26,24 @@ class Products extends Component
 
     public function render()
     {
-        $products = Product::where('company_id', Auth::user()->company_id)
-            ->where('name', 'like', '%' . $this->search . '%')
-            ->orderBy('name', 'asc')
-            ->paginate(10);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // 1. Iniciamos con query() para que sea un generador de consultas SQL
+        $query = Product::query();
+
+        // 2. Filtro de seguridad multi-empresa
+        if ($user && !$user->hasRole('super-admin')) {
+            $query->where('company_id', $user->company_id);
+        }
+
+        // 3. Filtro de búsqueda (usando el query builder)
+        if (!empty($this->search)) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        }
+
+        // 4. Ordenamos y paginamos en la base de datos
+        $products = $query->orderBy('name', 'asc')->paginate(10);
 
         return view('livewire.costo-produccion.products', ['products' => $products]);
     }

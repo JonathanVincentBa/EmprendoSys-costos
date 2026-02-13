@@ -174,9 +174,9 @@ class ProductWizard extends Component
     public function render()
     {
         return view('livewire.costo-produccion.product-wizard', [
-            'all_materials' => RawMaterial::where('company_id', Auth::user()->company_id)->get(),
-            'all_processes' => ProductionProcess::where('company_id', Auth::user()->company_id)->get(),
-            'all_packaging' => PackagingMaterial::where('company_id', Auth::user()->company_id)->get(),
+            'all_materials' => RawMaterial::all(),
+            'all_processes' => ProductionProcess::all(),
+            'all_packaging' => PackagingMaterial::all(),
             'res' => $this->calculateTotals()
         ]);
     }

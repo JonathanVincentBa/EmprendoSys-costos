@@ -33,9 +33,19 @@ class LaborCosts extends Component
 
     public function render()
     {
-        $roles = LaborCost::where('company_id', Auth::user()->company_id)
-            ->orderBy('role', 'asc')
-            ->paginate(10);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // 1. IMPORTANTE: Usamos query() y NO all()
+        $query = LaborCost::query();
+
+        // 2. Filtro de seguridad
+        if ($user && !$user->hasRole('super-admin')) {
+            $query->where('company_id', $user->company_id);
+        }
+
+        // 3. Ejecutamos orden y paginación sobre el query builder
+        $roles = $query->orderBy('role', 'asc')->paginate(10);
 
         return view('livewire.catalogos.labor-costs', [
             'roles' => $roles

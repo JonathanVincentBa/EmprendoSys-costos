@@ -114,7 +114,7 @@ class PointOfSale extends Component
     {
         $customers = [];
         if (strlen($this->customerSearch) > 1) {
-            $customers = Customer::where('company_id', Auth::user()->company_id)
+            $customers = Customer::all()
                 ->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->customerSearch . '%')
                         ->orWhere('identification', 'like', '%' . $this->customerSearch . '%');
@@ -123,7 +123,7 @@ class PointOfSale extends Component
 
         $products = [];
         if (strlen($this->productSearch) > 1 && (!$this->selectedProduct || $this->productSearch !== $this->selectedProduct->name)) {
-            $products = Product::where('company_id', Auth::user()->company_id)
+            $products = Product::all()
                 ->where('current_stock', '>', 0)
                 ->where('name', 'like', '%' . $this->productSearch . '%')
                 ->limit(5)->get();

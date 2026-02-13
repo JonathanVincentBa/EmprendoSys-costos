@@ -1,73 +1,139 @@
 <div class="p-6">
-    <div class="mb-6">
-        <flux:heading size="xl">Mi Empresa</flux:heading>
-        <flux:subheading>Configura la información legal y de contacto de tu negocio.</flux:subheading>
-    </div>
-
-    <div class="max-w-3xl">
-        <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm p-6">
-            <form wire:submit="save" class="space-y-6">
-                
-                <div class="flex flex-col sm:flex-row items-center gap-6 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-200 dark:border-zinc-700">
-                    <div class="relative shrink-0">
-                        @if ($logo)
-                            <img src="{{ $logo->temporaryUrl() }}" class="h-24 w-24 object-cover rounded-lg border-2 border-white dark:border-zinc-800 shadow-sm">
-                        @elseif($current_logo)
-                            <img src="{{ asset('storage/' . $current_logo) }}" class="h-24 w-24 object-cover rounded-lg border-2 border-white dark:border-zinc-800 shadow-sm">
-                        @else
-                            <div class="h-24 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-lg flex flex-col items-center justify-center text-zinc-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                </svg>
-                                <span class="text-[10px] uppercase font-bold text-center">Sin Logo</span>
-                            </div>
-                        @endif
-                        
-                        <div wire:loading wire:target="logo" class="absolute inset-0 bg-white/70 dark:bg-zinc-900/70 flex items-center justify-center rounded-lg">
-                            <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="flex-1 space-y-3 w-full sm:w-auto">
-                        <flux:label>Logo de la empresa</flux:label>
-                        <input type="file" wire:model="logo" id="logo_input" class="hidden" accept="image/*" />
-                        <div class="flex gap-2">
-                            <label for="logo_input" class="inline-flex items-center px-4 py-2 bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-md font-semibold text-xs text-zinc-700 dark:text-zinc-200 uppercase tracking-widest shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150 cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                                </svg>
-                                Subir nueva imagen
-                            </label>
-                        </div>
-                        <flux:error name="logo" />
-                        <p class="text-xs text-zinc-500">Formatos: PNG, JPG (Máx. 1MB)</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <flux:input label="Nombre / Razón Social" wire:model="name" placeholder="Nombre de tu empresa" />
-                    
-                    <flux:input label="RUC / Identificación" wire:model="ruc" placeholder="Ej: 1790000000001" />
-
-                    <flux:input type="email" label="Correo Electrónico" wire:model="email" placeholder="correo@empresa.com" />
-
-                    <flux:input label="Teléfono de contacto" wire:model="phone" placeholder="Ej: 0999999999" />
-
-                    <div class="md:col-span-2">
-                        <flux:textarea label="Dirección Física" wire:model="address" placeholder="Calle principal, número y ciudad..." rows="3" />
-                    </div>
-                </div>
-
-                <div class="flex justify-end pt-4 border-t border-zinc-200 dark:border-zinc-700">
-                    <flux:button type="submit" variant="primary" icon="check" wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="save">Guardar cambios</span>
-                        <span wire:loading wire:target="save">Procesando...</span>
-                    </flux:button>
-                </div>
-            </form>
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <flux:heading size="xl">
+                {{ auth()->user()->hasRole('super-admin') ? ($isEditing ? 'Configuración de Empresa' : 'Gestión de Clientes') : 'Mi Empresa' }}
+            </flux:heading>
+            <flux:subheading>Administra la información legal y el estado de los negocios vinculados.</flux:subheading>
         </div>
+
+        @if (auth()->user()->hasRole('super-admin'))
+            @if ($isEditing)
+                <flux:button wire:click="$set('isEditing', false)" variant="subtle" icon="arrow-left">Volver al listado
+                </flux:button>
+            @else
+                <flux:button wire:click="createCompany" variant="primary" icon="plus">Nuevo Cliente</flux:button>
+            @endif
+        @endif
     </div>
+
+    @if (auth()->user()->hasRole('super-admin') && !$isEditing)
+        {{-- TABLA DE GESTIÓN PARA SUPER-ADMIN --}}
+        <div
+            class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden">
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column>Empresa</flux:table.column>
+                    <flux:table.column>RUC / Email</flux:table.column>
+                    <flux:table.column>Estado</flux:table.column>
+                    <flux:table.column>Acciones</flux:table.column>
+                </flux:table.columns>
+
+                <flux:table.rows>
+                    @foreach ($companies as $item)
+                        <flux:table.row :key="$item->id">
+                            <flux:table.cell>
+                                <div class="flex items-center gap-3">
+                                    @if ($item->logo)
+                                        <img src="{{ Storage::url($item->logo) }}"
+                                            class="w-8 h-8 rounded-lg object-cover">
+                                    @else
+                                        <div class="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center">
+                                            <flux:icon name="building-office" variant="micro" />
+                                        </div>
+                                    @endif
+                                    <span class="font-medium text-zinc-800 dark:text-white">{{ $item->name }}</span>
+                                </div>
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                <div class="text-sm">{{ $item->ruc }}</div>
+                                <div class="text-xs text-zinc-500">{{ $item->email }}</div>
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                <flux:badge color="{{ $item->status === 'active' ? 'green' : 'red' }}" size="sm"
+                                    inset>
+                                    {{ $item->status === 'active' ? 'Activo' : 'Suspendido' }}
+                                </flux:badge>
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                <div class="flex gap-2">
+                                    <flux:button wire:click="editCompany({{ $item->id }})" variant="subtle"
+                                        icon="pencil-square" size="sm" />
+
+                                    <flux:button wire:click="toggleStatus({{ $item->id }})" variant="subtle"
+                                        icon="{{ $item->status === 'active' ? 'pause-circle' : 'play-circle' }}"
+                                        size="sm"
+                                        title="{{ $item->status === 'active' ? 'Suspender' : 'Activar' }}" />
+
+                                    <flux:button
+                                        wire:confirm="¿Estás seguro de eliminar esta empresa? Esta acción no se puede deshacer."
+                                        wire:click="deleteCompany({{ $item->id }})" variant="subtle" color="red"
+                                        icon="trash" size="sm" />
+                                </div>
+                            </flux:table.cell>
+                        </flux:table.row>
+                    @endforeach
+                </flux:table.rows>
+            </flux:table>
+            <div class="p-4 border-t border-zinc-200 dark:border-zinc-700">
+                {{ $companies->links() }}
+            </div>
+        </div>
+    @else
+        {{-- FORMULARIO DE EDICIÓN / CREACIÓN --}}
+        <div class="max-w-4xl mx-auto">
+            <div
+                class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm overflow-hidden">
+                <form wire:submit="save" class="p-6 space-y-6">
+                    {{-- Sección Logo y Estado --}}
+                    <div
+                        class="flex flex-col md:flex-row gap-6 items-start md:items-center pb-6 border-b border-zinc-200 dark:border-zinc-700">
+                        <div class="relative group">
+                            <div
+                                class="w-32 h-32 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-600 flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-zinc-800">
+                                @if ($logo)
+                                    <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-cover">
+                                @elseif($current_logo)
+                                    <img src="{{ Storage::url($current_logo) }}" class="w-full h-full object-cover">
+                                @else
+                                    <flux:icon name="photo" class="text-zinc-400" />
+                                @endif
+                            </div>
+                            <input type="file" wire:model="logo" class="absolute inset-0 opacity-0 cursor-pointer">
+                        </div>
+
+                        <div class="flex-1 space-y-2">
+                            <flux:heading>Logo Institucional</flux:heading>
+                            <p class="text-xs text-zinc-500 mb-4">PNG o JPG cuadrado (Máx. 1MB)</p>
+
+                            @if (auth()->user()->hasRole('super-admin'))
+                                <flux:select label="Estado del Cliente" wire:model="status">
+                                    <flux:select.option value="active">Activo (Acceso completo)</flux:select.option>
+                                    <flux:select.option value="suspended">Suspendido (Acceso bloqueado)
+                                    </flux:select.option>
+                                </flux:select>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Datos del Formulario --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <flux:input label="Nombre / Razón Social" wire:model="name" />
+                        <flux:input label="RUC / Identificación" wire:model="ruc" />
+                        <flux:input type="email" label="Correo Electrónico" wire:model="email" />
+                        <flux:input label="Teléfono" wire:model="phone" />
+                        <div class="md:col-span-2">
+                            <flux:textarea label="Dirección Física" wire:model="address" rows="2" />
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                        <flux:button type="submit" variant="primary" icon="check" wire:loading.attr="disabled">
+                            {{ $company_id ? 'Actualizar Datos' : 'Registrar Empresa' }}
+                        </flux:button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 </div>

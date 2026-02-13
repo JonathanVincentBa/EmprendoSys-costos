@@ -28,13 +28,27 @@ class Customers extends Component
 
     public function render()
     {
-        $customers = Customer::where('company_id', Auth::user()->company_id)
-            ->where(function($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('identification', 'like', '%' . $this->search . '%');
-            })
-            ->latest()
-            ->paginate(10);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // 1. Iniciamos el Query Builder con query()
+        $query = Customer::query();
+
+        // 2. Filtro Multi-tenant: Si no es super-admin, solo ve sus clientes
+        if ($user && !$user->hasRole('super-admin')) {
+            $query->where('company_id', $user->company_id);
+        }
+
+        // 3. Filtro de búsqueda (Buscamos en la base de datos, no en memoria)
+        if (!empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('identification', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // 4. Ordenar por los más recientes y paginar
+        $customers = $query->latest()->paginate(10);
 
         return view('livewire.sales.customers', [
             'customers' => $customers

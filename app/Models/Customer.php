@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'company_id',
         'name',
@@ -20,4 +23,6 @@ class Customer extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    
 }

@@ -4,30 +4,24 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Company;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    public function run()
+    public function run($companyId = null): void
     {
-        $company = Company::firstOrCreate([
-            'ruc' => '9999999999001'
-        ], [
-            'name' => 'Miski Sabores',
-            'address' => 'Quito, Ecuador',
-            'email' => 'info@miski.com',
-            'phone' => '0999999999',
-        ]);
+        if (!$companyId) return;
 
-        User::updateOrCreate(
-            ['email' => 'jonathanvincent@outlook.com'],
+        $user = User::updateOrCreate(
+            ['email' => "admin.empresa{$companyId}@test.com"],
             [
-                'name' => 'Jonathan Vincent',
-                'email' => 'jonathanvincent@outlook.com',
+                'name' => "Admin Empresa {$companyId}",
                 'password' => Hash::make('password'),
-                'company_id' => $company->id,
+                'company_id' => $companyId,
+                'email_verified_at' => now(),
             ]
         );
+
+        $user->assignRole('admin');
     }
 }

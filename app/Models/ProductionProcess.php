@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductionProcess extends Model
 {
+    use BelongsToCompany;
     
     protected $fillable = ['company_id', 'name', 'hours_per_batch'];
     

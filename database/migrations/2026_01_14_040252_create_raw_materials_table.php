@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('raw_materials', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('name');
             $table->decimal('unit_cost', 10, 2);
             $table->enum('unit', ['kg', 'l', 'unidad', 'gr', 'ml']);
+            $table->unique(['company_id', 'code']);
             $table->timestamps();
         });
     }

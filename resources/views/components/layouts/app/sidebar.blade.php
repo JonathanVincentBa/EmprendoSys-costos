@@ -4,167 +4,136 @@
 <head>
     @include('partials.head')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Ajuste para evitar que el contenido se pegue al sidebar en pantallas grandes */
+        @media (min-width: 1024px) {
+            .main-content {
+                margin-left: 0;
+                /* Flux ya maneja el espacio si el contenedor es flex */
+            }
+        }
+    </style>
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
-    <flux:sidebar sticky collapsible="mobile"
-        class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-        <flux:sidebar.header>
-            <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-            <flux:sidebar.collapse class="lg:hidden" />
-        </flux:sidebar.header>
+<body class="min-h-screen bg-white dark:bg-zinc-800 antialiased">
 
-        <flux:sidebar.nav>
-            <flux:sidebar.group :heading="__('Platform')" class="grid">
-                <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                    wire:navigate>
-                    {{ __('Dashboard') }}
-                </flux:sidebar.item>
-            </flux:sidebar.group>
+    {{-- Contenedor Principal Flex --}}
+    <div class="flex min-h-screen w-full">
 
-            <flux:sidebar.group :heading="__('Costos de Producción')" class="grid">
-                <flux:sidebar.item icon="sparkles" :href="route('product.wizard')"
-                    :current="request()->routeIs('product.wizard')" wire:navigate>
-                    {{ __('Asistente Maestro') }}
-                </flux:sidebar.item>
-                
-                <flux:sidebar.item icon="document-text" :href="route('products.index')"
-                    :current="request()->routeIs('products.*')" wire:navigate>
-                    {{ __('Productos') }}
-                </flux:sidebar.item>
-                
-            </flux:sidebar.group>
+        {{-- Sidebar --}}
+        <flux:sidebar sticky collapsible="mobile"
+            class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+            <flux:sidebar.header>
+                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
+                <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
+            </flux:sidebar.header>
 
-            <flux:sidebar.group :heading="__('Ventas')" class="grid">
-                <flux:sidebar.item icon="shopping-bag" :href="route('sales.pos')"
-                    :current="request()->routeIs('sales.*')" wire:navigate>
-                    {{ __('Órdenes de Venta') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="user-group" :href="route('clients.index')"
-                    :current="request()->routeIs('clients.*')" wire:navigate>
-                    {{ __('Clientes') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="document-check" :href="route('invoices.index')"
-                    :current="request()->routeIs('invoices.*')" wire:navigate>
-                    {{ __('Facturación') }}
-                </flux:sidebar.item>
-            </flux:sidebar.group>
+            <flux:sidebar.nav>
+                <flux:sidebar.group :heading="__('Plataforma')" class="grid">
+                    <flux:sidebar.item icon="home" :href="route('dashboard')" wire:navigate>Dashboard
+                    </flux:sidebar.item>
 
-            <flux:sidebar.group :heading="__('Catálogos')" class="grid">
-                <flux:sidebar.item icon="archive-box" :href="route('raw-materials.index')"
-                    :current="request()->routeIs('raw-materials.*')" wire:navigate>
-                    {{ __('Materias Primas') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="cube" :href="route('packaging.index')"
-                    :current="request()->routeIs('packaging.*')" wire:navigate>
-                    {{ __('Empaques') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="bolt" :href="route('supplies.index')"
-                    :current="request()->routeIs('supplies.*')" wire:navigate>
-                    {{ __('Suministros') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="cog-6-tooth" :href="route('overhead-config.index')"
-                    :current="request()->routeIs('overhead-config.*')" wire:navigate>
-                    {{ __('Gastos Indirectos') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="users" :href="route('labor-costs.index')"
-                    :current="request()->routeIs('labor-costs.*')" wire:navigate>
-                    {{ __('Mano de Obra') }}
-                </flux:sidebar.item>
-            </flux:sidebar.group>
+                    {{-- Solo Super Admin ve Gestión de Empresas --}}
+                    @can('ver empresas')
+                        <flux:sidebar.item icon="building-office" :href="route('admin.companies')" wire:navigate>
+                            Gestión Empresas
+                        </flux:sidebar.item>
+                    @endcan
 
-            <flux:sidebar.group :heading="__('Configuración')" class="grid">
-                <flux:sidebar.item icon="building-office" :href="route('company.edit')"
-                    :current="request()->routeIs('company.edit')" wire:navigate>
-                    {{ __('Mi Empresa') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="cog" :href="route('profile.edit')"
-                    :current="request()->routeIs('profile.edit')" wire:navigate>
-                    {{ __('Ajustes') }}
-                </flux:sidebar.item>
-            </flux:sidebar.group>
-        </flux:sidebar.nav>
+                    {{-- Mi Empresa: Visible para Super Admin (bypass) o para quien tenga el permiso --}}
+                    @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('editar mi empresa'))
+                        <flux:sidebar.item icon="cog-6-tooth" :href="route('my.company')" wire:navigate>
+                            Mi Empresa
+                        </flux:sidebar.item>
+                    @endif
+                </flux:sidebar.group>
 
-        <flux:spacer />
+                <flux:sidebar.group :heading="__('Costos de Producción')" class="grid">
+                    <flux:sidebar.item icon="sparkles" :href="route('product.wizard')"
+                        :current="request()->routeIs('product.wizard')" wire:navigate>
+                        Asistente Maestro
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="cube" :href="route('products.index')"
+                        :current="request()->routeIs('products.index')" wire:navigate>
+                        Productos
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
 
-        <flux:sidebar.nav>
-            <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit"
-                target="_blank">
-                {{ __('Repository') }}
-            </flux:sidebar.item>
+                <flux:sidebar.group :heading="__('Ventas')" class="grid">
+                    <flux:sidebar.item icon="shopping-cart" :href="route('sales.pos')"
+                        :current="request()->routeIs('sales.pos')" wire:navigate>
+                        Punto de Venta
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="users" :href="route('clients.index')"
+                        :current="request()->routeIs('clients.index')" wire:navigate>
+                        Clientes
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
 
-            <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire"
-                target="_blank">
-                {{ __('Documentation') }}
-            </flux:sidebar.item>
-        </flux:sidebar.nav>
+                <flux:sidebar.group :heading="__('Configuración')" class="grid">
+                    <flux:sidebar.item icon="cog-6-tooth" :href="route('my.company')"
+                        :current="request()->routeIs('my.company')" wire:navigate>
+                        Mi Empresa
+                    </flux:sidebar.item>
 
-        <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
-    </flux:sidebar>
+                    <flux:sidebar.item icon="beaker" :href="route('raw-materials.index')">Materias Primas
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="archive-box" :href="route('packaging.index')">Empaques</flux:sidebar.item>
+                    <flux:sidebar.item icon="bolt" :href="route('supplies.index')">Suministros</flux:sidebar.item>
+                    <flux:sidebar.item icon="calculator" :href="route('overhead-config.index')">Costos Indirectos
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="user-group" :href="route('labor-costs.index')">Mano de Obra
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+            </flux:sidebar.nav>
 
-    <flux:header class="lg:hidden">
-        <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+            <flux:spacer />
 
-        <flux:spacer />
-
-        <flux:dropdown position="top" align="end">
-            <flux:profile :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
-
-            <flux:menu>
-                <flux:menu.radio.group>
-                    <div class="p-0 text-sm font-normal">
-                        <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                            <flux:avatar :name="auth()->user()->name" :initials="auth()->user()->initials()" />
-
-                            <div class="grid flex-1 text-start text-sm leading-tight">
-                                <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
-                                <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
-                            </div>
-                        </div>
-                    </div>
-                </flux:menu.radio.group>
-
-                <flux:menu.separator />
-
-                <flux:menu.radio.group>
-                    <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
-                        {{ __('Settings') }}
+            <flux:dropdown position="top" align="start" class="max-lg:hidden">
+                <flux:profile :name="auth()->user()->name" :initials="auth()->user()->initials()" />
+                <flux:menu>
+                    <flux:menu.item icon="arrow-right-start-on-rectangle" href="{{ route('logout') }}"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        Cerrar Sesión
                     </flux:menu.item>
-                </flux:menu.radio.group>
+                </flux:menu>
+            </flux:dropdown>
+        </flux:sidebar>
 
-                <flux:menu.separator />
+        {{-- Lado derecho del Sidebar --}}
+        <div class="flex-1 flex flex-col min-w-0">
 
-                <form method="POST" action="{{ route('logout') }}" class="w-full">
-                    @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle"
-                        class="w-full cursor-pointer" data-test="logout-button">
-                        {{ __('Log Out') }}
-                    </flux:menu.item>
-                </form>
-            </flux:menu>
-        </flux:dropdown>
-    </flux:header>
+            {{-- Header Móvil --}}
+            <flux:header
+                class="lg:hidden bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 px-4 flex items-center h-16 sticky top-0 z-10">
+                <flux:sidebar.toggle class="-ms-2" icon="bars-3" />
+                <flux:spacer />
+                <flux:profile :initials="auth()->user()->initials()" />
+            </flux:header>
 
-    {{ $slot }}
+            {{-- CONTENIDO PRINCIPAL: Con padding suficiente para no montarse --}}
+            <main class="flex-1 p-6 lg:p-10 w-full mx-auto max-w-7xl">
+                {{ $slot }}
+            </main>
+        </div>
+    </div>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
     @fluxScripts
 
     <script>
-        function noty(msg, icon = 'success') {
-            Swal.fire({
-                position: 'top-end',
-                icon: icon,
-                title: msg,
-                showConfirmButton: false,
-                timer: 2000,
-                toast: true
-            });
-        }
-
         document.addEventListener('livewire:init', () => {
             Livewire.on('swal', (event) => {
                 const data = Array.isArray(event) ? event[0] : event;
-                noty(data.message, data.type || 'success');
+                Swal.fire({
+                    position: 'top-end',
+                    icon: data.type || 'success',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    toast: true
+                });
             });
         });
     </script>

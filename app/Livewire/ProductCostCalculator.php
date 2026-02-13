@@ -33,7 +33,7 @@ class ProductCostCalculator extends Component
     {
         // Solo productos de la empresa del usuario logueado
         $products = Auth::check() && Auth::user()?->company_id
-            ? Product::where('company_id', Auth::user()->company_id)->get()
+            ? Product::all()
             : collect();
 
         return view('livewire.product-cost-calculator', compact('products'));

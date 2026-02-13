@@ -13,10 +13,10 @@ class RawMaterials extends Component
 
     // Propiedades del modelo
     public $materialId, $code, $name, $unit, $unit_cost;
-    
+
     // Control de UI
     public $search = '';
-    public $isOpen = false; 
+    public $isOpen = false;
 
     protected $rules = [
         'code' => 'required|string|max:20',
@@ -27,13 +27,27 @@ class RawMaterials extends Component
 
     public function render()
     {
-        $materials = RawMaterial::where('company_id', Auth::user()->company_id)
-            ->where(function($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('code', 'like', '%' . $this->search . '%');
-            })
-            ->latest()
-            ->paginate(10);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Empezamos la consulta sin ejecutarla (sin all() ni get())
+        $query = RawMaterial::query();
+
+        // 1. Filtro por Empresa (Si no es Super-Admin, solo ve lo suyo)
+        if (!$user->hasRole('super-admin')) {
+            $query->where('company_id', $user->company_id);
+        }
+
+        // 2. Filtro de Búsqueda (SQL)
+        if (!empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('code', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // 3. Orden y Paginación (SQL)
+        $materials = $query->latest()->paginate(10);
 
         return view('livewire.catalogos.raw-materials', [
             'materials' => $materials
@@ -105,7 +119,7 @@ class RawMaterials extends Component
     public function delete($id)
     {
         RawMaterial::find($id)->delete();
-        
+
         // Lanzar alerta de eliminación
         $this->dispatch('swal', [
             'message' => 'Materia prima eliminada',

@@ -2,12 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 
 class SupplyUsage extends Model
 {
+    use BelongsToCompany;
     protected $fillable = ['company_id', 'recipe_id', 'supply_id', 'quantity'];
-    
-    public function company() { return $this->belongsTo(Company::class); }
-    public function supply() { return $this->belongsTo(Supply::class); }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+    public function supply()
+    {
+        return $this->belongsTo(Supply::class);
+    }
 }

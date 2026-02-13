@@ -112,9 +112,9 @@ class RecipeManager extends Component
     public function render()
     {
         return view('livewire.costo-produccion.recipe-manager', [
-            'materials' => RawMaterial::where('company_id', Auth::user()->company_id)->get(),
-            'all_processes' => ProductionProcess::where('company_id', Auth::user()->company_id)->get(),
-            'all_packagings' => PackagingMaterial::where('company_id', Auth::user()->company_id)->get(),
+            'materials' => RawMaterial::all(),
+            'all_processes' => ProductionProcess::all(),
+            'all_packagings' => PackagingMaterial::all(),
         ]);
     }
 }

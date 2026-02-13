@@ -19,7 +19,7 @@ class OverheadConfigs extends Component
     public function render()
     {
         // Obtenemos los gastos indirectos y el margen por separado para la vista
-        $configs = OverheadConfig::where('company_id', Auth::user()->company_id)->get();
+        $configs = OverheadConfig::all();
         
         return view('livewire.catalogos.overhead-configs', [
             'indirects' => $configs->where('is_profit_margin', false),

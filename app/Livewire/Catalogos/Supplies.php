@@ -19,14 +19,30 @@ class Supplies extends Component
 
     public function render()
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // 1. Iniciamos la consulta (Query Builder)
+        $query = Supply::query();
+
+        // 2. Filtro de Empresa (Tenant)
+        if (!$user->hasRole('super-admin')) {
+            $query->where('company_id', $user->company_id);
+        }
+
+        // 3. Filtro de Búsqueda
+        if (!empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('code', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // 4. Orden y Paginación
+        $supplies = $query->latest()->paginate(10);
+
         return view('livewire.catalogos.supplies', [
-            'supplies' => Supply::where('company_id', Auth::user()->company_id)
-                ->where(function ($query) {
-                    $query->where('name', 'like', '%' . $this->search . '%')
-                        ->orWhere('code', 'like', '%' . $this->search . '%');
-                })
-                ->latest()
-                ->paginate(10)
+            'supplies' => $supplies
         ]);
     }
 
