@@ -14,6 +14,7 @@ use App\Livewire\Sales\PointOfSale;
 use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -76,4 +77,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return '<h1 class="p-6 text-2xl">Módulo SRI (Próximamente)</h1>';
         })->name('invoices.index');
     });
+});
+
+Route::get('/reset-db-12345', function () {
+    if (Auth::user()?->hasRole('super-admin')) {
+        Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
+        return "Base de datos reseteada con éxito.";
+    }
+    return "No autorizado.";
 });
