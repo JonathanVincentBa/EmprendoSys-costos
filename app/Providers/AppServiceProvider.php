@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate; // Importante para el Super-Admin
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -26,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Forzar HTTPS si no estamos en entorno local (como en Railway)
+        if (config('app.env') !== 'local') {
+            URL::forceScheme('https');
+        }
+        
         $this->configureDefaults();
 
         // Registro de Observers
