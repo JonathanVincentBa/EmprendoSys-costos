@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Administracion\Company;
+use App\Livewire\Administracion\Users;
 use App\Livewire\Catalogos\LaborCosts;
 use App\Livewire\Catalogos\OverheadConfigs;
 use App\Livewire\Catalogos\PackagingMaterials;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // --- SECCIÓN ADMINISTRACIÓN GLOBAL ---
     Route::middleware(['can:ver empresas'])->prefix('administracion')->group(function () {
         Route::get('/empresas', Company::class)->name('admin.companies');
+        Route::get('/administracion/usuarios', Users::class)->name('users.index');
     });
 
     // --- SECCIÓN MI EMPRESA (Tenant) ---
@@ -80,7 +82,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('/reset-db-12345', function () {
-    if (Auth::user()?->hasRole('super-admin')) {
+    /** @var \App\Models\User $user */
+        $user = Auth::user();
+    if ($user?->hasRole('super-admin')) {
         Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
         return "Base de datos reseteada con éxito.";
     }

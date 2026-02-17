@@ -46,6 +46,9 @@
                             Mi Empresa
                         </flux:sidebar.item>
                     @endif
+
+                    <flux:sidebar.item icon="users" :href="route('users.index')" wire:navigate>Gestionar Usuarios
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
 
                 <flux:sidebar.group :heading="__('Costos de Producción')" class="grid">
