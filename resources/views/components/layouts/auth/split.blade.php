@@ -9,7 +9,7 @@
     <body class="min-h-screen bg-white antialiased font-['Instrument_Sans']">
         <div class="relative grid min-h-screen flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0">
             
-            <div class="relative hidden h-full flex-col text-white lg:flex min-h-[600px]">
+            <div class="relative hidden h-full flex-col text-white lg:flex min-h-150">
                 <div class="absolute inset-0 bg-cover bg-center" 
                      style="background-image: url('https://images.unsplash.com/photo-1550989460-0adf9ea622e2?q=80&w=1974&auto=format&fit=crop');">
                 </div>
@@ -32,7 +32,7 @@
             </div>
 
             <div class="w-full h-full py-12 lg:p-8 bg-gray-50 flex items-center justify-center">
-                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px] px-6">
+                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-100 px-6">
                     
                     <a href="{{ route('home') }}" class="z-20 flex flex-col items-center gap-2 font-medium lg:hidden mb-4" wire:navigate>
                          <span class="text-3xl font-bold tracking-tight text-black">

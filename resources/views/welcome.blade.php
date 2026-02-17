@@ -29,7 +29,7 @@
                         <a href="{{ url('/dashboard') }}" class="text-sm font-semibold leading-6 bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition">Ir al Panel</a>
                     @else
                         <a href="{{ route('login') }}" class="text-sm font-semibold leading-6 self-center">Iniciar Sesión</a>
-                        <a href="{{ route('register') }}" class="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 transition">Probar Gratis</a>
+                        <a href="{{ route('register') }}" class="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 transition">Probar Gratis</a>
                     @endauth
                 @endif
             </div>
@@ -43,14 +43,14 @@
                     </div>
                 </div>
                 <div class="text-center">
-                    <h1 class="text-5xl font-bold tracking-tight sm:text-7xl bg-gradient-to-b from-white to-gray-500 bg-clip-text text-transparent">
+                    <h1 class="text-5xl font-bold tracking-tight sm:text-7xl bg-linear-to-b from-white to-gray-500 bg-clip-text text-transparent">
                         Controla tu producción al centavo
                     </h1>
                     <p class="mt-6 text-lg leading-8 text-gray-400 max-w-2xl mx-auto">
                         Diseñado para emprendedores que transforman materia prima. Calcula costos exactos, gestiona inventarios y proyecta tus ganancias reales sin complicaciones.
                     </p>
                     <div class="mt-10 flex items-center justify-center gap-x-6">
-                        <a href="{{ route('register') }}" class="rounded-xl bg-orange-600 px-8 py-4 text-lg font-bold text-white shadow-lg hover:bg-orange-500 hover:scale-105 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
+                        <a href="{{ route('register') }}" class="rounded-xl bg-orange-600 px-8 py-4 text-lg font-bold text-white shadow-lg hover:bg-orange-500 hover:scale-105 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
                             Obtener 2 meses GRATIS
                         </a>
                         <a href="#servicios" class="text-sm font-semibold leading-6 text-white border border-white/10 px-6 py-3 rounded-xl hover:bg-white/5 transition">
