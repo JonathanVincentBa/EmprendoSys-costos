@@ -4,118 +4,121 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>EmprendoSys - Potencia tu Producción</title>
-
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <title>EmprendoSys - Gestión de Costos</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
 
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
-    <body class="bg-[#0A0A0A] text-white antialiased font-['Instrument_Sans']">
+    {{-- Fondo Gris Piedra Opaco (#F1F1EF) - Bajo reflejo visual --}}
+    <body class="bg-[#F1F1EF] text-zinc-700 antialiased font-['Instrument_Sans']">
         
-        <nav class="flex items-center justify-between p-6 lg:px-8 max-w-7xl mx-auto w-full" aria-label="Global">
+        {{-- Navbar --}}
+        <nav class="flex items-center justify-between p-6 lg:px-8 max-w-7xl mx-auto w-full sticky top-0 bg-[#F1F1EF]/90 backdrop-blur-sm z-50">
             <div class="flex lg:flex-1">
-                <a href="#" class="-m-1.5 p-1.5 text-2xl font-bold tracking-tight">
-                    <span class="text-orange-500 underline decoration-white/20">Emprendo</span>Sys
+                <a href="{{ route('home') }}" class="-m-1.5 p-1.5 text-xl font-bold tracking-tight text-zinc-800">
+                    <span class="text-orange-700">Emprendo</span>Sys
                 </a>
             </div>
-            <div class="flex flex-1 justify-end gap-x-6">
+            <div class="flex flex-1 justify-end gap-x-4 items-center">
                 @if (Route::has('login'))
-                    @auth
-                        <a href="{{ url('/dashboard') }}" class="text-sm font-semibold leading-6 bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition">Ir al Panel</a>
-                    @else
-                        <a href="{{ route('login') }}" class="text-sm font-semibold leading-6 self-center">Iniciar Sesión</a>
-                        <a href="{{ route('register') }}" class="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 transition">Probar Gratis</a>
-                    @endauth
+                    <nav class="flex gap-2">
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="rounded-lg px-4 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-200 transition">Dashboard</a>
+                        @else
+                            <a href="{{ route('login') }}" class="rounded-lg px-4 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-200 transition">Entrar</a>
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}" class="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-bold text-zinc-100 shadow-sm hover:bg-zinc-700 transition">Registrarse</a>
+                            @endif
+                        @endauth
+                    </nav>
                 @endif
             </div>
         </nav>
 
-        <div class="relative isolate px-6 pt-14 lg:px-8">
-            <div class="mx-auto max-w-4xl py-20">
-                <div class="hidden sm:mb-8 sm:flex sm:justify-center">
-                    <div class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-400 ring-1 ring-white/10 hover:ring-white/20">
-                        ¡Lanzamiento exclusivo para 10 emprendedores! <a href="{{ route('register') }}" class="font-semibold text-orange-500"><span class="absolute inset-0" aria-hidden="true"></span>Leer más &rarr;</a>
+        <main class="isolate">
+            {{-- Hero Section --}}
+            <div class="relative pt-10 pb-20 lg:pt-24">
+                <div class="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+                    <div class="inline-flex items-center gap-2 rounded-full bg-zinc-200/80 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-8 border border-zinc-300">
+                        Sistemas de Producción
                     </div>
-                </div>
-                <div class="text-center">
-                    <h1 class="text-5xl font-bold tracking-tight sm:text-7xl bg-linear-to-b from-white to-gray-500 bg-clip-text text-transparent">
-                        Controla tu producción al centavo
+                    <h1 class="text-4xl font-bold tracking-tight text-zinc-800 sm:text-6xl">
+                        Controla tus costos con<br>
+                        <span class="text-zinc-500 font-medium font-serif">una interfaz mate.</span>
                     </h1>
-                    <p class="mt-6 text-lg leading-8 text-gray-400 max-w-2xl mx-auto">
-                        Diseñado para emprendedores que transforman materia prima. Calcula costos exactos, gestiona inventarios y proyecta tus ganancias reales sin complicaciones.
+                    <p class="mt-6 text-lg leading-8 text-zinc-500 max-w-2xl mx-auto">
+                        Diseñado para emprendedores que pasan horas frente a la pantalla. Una paleta opaca para mantener la mente clara y la vista descansada.
                     </p>
                     <div class="mt-10 flex items-center justify-center gap-x-6">
-                        <a href="{{ route('register') }}" class="rounded-xl bg-orange-600 px-8 py-4 text-lg font-bold text-white shadow-lg hover:bg-orange-500 hover:scale-105 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
-                            Obtener 2 meses GRATIS
-                        </a>
-                        <a href="#servicios" class="text-sm font-semibold leading-6 text-white border border-white/10 px-6 py-3 rounded-xl hover:bg-white/5 transition">
-                            Ver funciones <span aria-hidden="true">↓</span>
-                        </a>
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="rounded-xl bg-orange-700 px-8 py-4 text-sm font-bold text-zinc-100 shadow-md hover:bg-orange-800 transition-all">
+                                Comenzar ahora
+                            </a>
+                        @endif
+                        <a href="#features" class="text-sm font-bold text-zinc-400 hover:text-zinc-600 transition">Explorar funciones ↓</a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <section id="servicios" class="py-24 bg-zinc-900/30">
-            <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                <div class="mx-auto max-w-2xl lg:text-center">
-                    <h2 class="text-base font-semibold leading-7 text-orange-500 uppercase tracking-widest">Profesionaliza tu negocio</h2>
-                    <p class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl text-white">Todo lo que necesitas en un solo sistema web</p>
-                </div>
-                <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-                    <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-                        <div class="flex flex-col p-8 bg-zinc-900 border border-white/5 rounded-2xl">
-                            <dt class="flex items-center gap-x-3 text-lg font-bold leading-7 text-white">
-                                <span class="text-3xl">🧮</span> Costeo Automático
-                            </dt>
-                            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-400">
-                                <p class="flex-auto">Calcula el costo real de cada salsa, pan o producto. Incluye materia prima, envases y mano de obra sin errores manuales.</p>
-                            </dd>
-                        </div>
-                        <div class="flex flex-col p-8 bg-zinc-900 border border-white/5 rounded-2xl shadow-xl shadow-orange-900/10">
-                            <dt class="flex items-center gap-x-3 text-lg font-bold leading-7 text-white">
-                                <span class="text-3xl">📦</span> Stock Inteligente
-                            </dt>
-                            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-400">
-                                <p class="flex-auto">Recibe alertas cuando tu materia prima se esté agotando. Mantén tu inventario siempre actualizado automáticamente con cada venta.</p>
-                            </dd>
-                        </div>
-                        <div class="flex flex-col p-8 bg-zinc-900 border border-white/5 rounded-2xl">
-                            <dt class="flex items-center gap-x-3 text-lg font-bold leading-7 text-white">
-                                <span class="text-3xl">📈</span> Ganancia Proyectada
-                            </dt>
-                            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-400">
-                                <p class="flex-auto">Visualiza cuánto dinero real te queda después de cada venta. Gráficos claros de tus ingresos y egresos diarios.</p>
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
-        </section>
+            {{-- Sección de Funciones (ID: features) --}}
+            <section id="features" class="py-24 bg-[#E8E8E6] border-y border-zinc-300/50">
+                <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div class="mx-auto max-w-2xl lg:text-center mb-16">
+                        <h2 class="text-xs font-bold text-orange-700 uppercase tracking-[0.3em]">Beneficios</h2>
+                        <p class="mt-2 text-3xl font-bold text-zinc-800">Todo en un solo lugar</p>
+                    </div>
 
-        <div class="py-24 sm:py-32">
-            <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                <div class="relative isolate overflow-hidden bg-orange-600 px-6 py-24 shadow-2xl rounded-3xl sm:px-24 xl:py-32">
-                    <h2 class="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                        Únete hoy mismo por solo $10 al mes
-                    </h2>
-                    <p class="mx-auto mt-2 max-w-xl text-center text-lg leading-8 text-orange-100">
-                        O aprovecha nuestra oferta de lanzamiento y úsalo <b>GRATIS por 60 días</b> a cambio de tu opinión para mejorar el sistema.
-                    </p>
-                    <div class="mt-10 flex justify-center">
-                        <a href="{{ route('register') }}" class="rounded-lg bg-white px-8 py-3.5 text-sm font-bold text-orange-600 shadow-sm hover:bg-gray-100 transition">Empezar ahora</a>
+                    <div class="grid grid-cols-1 gap-12 lg:grid-cols-3">
+                        {{-- Card 1 --}}
+                        <div class="group">
+                            <div class="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-300 text-zinc-600 group-hover:bg-orange-700 group-hover:text-white transition-all">
+                                <span class="text-xl">🧮</span>
+                            </div>
+                            <h3 class="text-sm font-bold text-zinc-800 uppercase tracking-wider">Costo por Receta</h3>
+                            <p class="mt-3 text-sm leading-relaxed text-zinc-500">Calcula automáticamente el costo de cada ingrediente y empaque usado en tus productos.</p>
+                        </div>
+
+                        {{-- Card 2 --}}
+                        <div class="group">
+                            <div class="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-300 text-zinc-600 group-hover:bg-orange-700 group-hover:text-white transition-all">
+                                <span class="text-xl">📦</span>
+                            </div>
+                            <h3 class="text-sm font-bold text-zinc-800 uppercase tracking-wider">Stock Inteligente</h3>
+                            <p class="mt-3 text-sm leading-relaxed text-zinc-500">Alertas automáticas de inventario bajo para que nunca detengas tu producción.</p>
+                        </div>
+
+                        {{-- Card 3 --}}
+                        <div class="group">
+                            <div class="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-300 text-zinc-600 group-hover:bg-orange-700 group-hover:text-white transition-all">
+                                <span class="text-xl">📈</span>
+                            </div>
+                            <h3 class="text-sm font-bold text-zinc-800 uppercase tracking-wider">Análisis de Venta</h3>
+                            <p class="mt-3 text-sm leading-relaxed text-zinc-500">Visualiza tu utilidad real y proyecciones de crecimiento basadas en datos históricos.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {{-- CTA Section --}}
+            <div class="py-24 px-6 text-center">
+                <div class="mx-auto max-w-3xl rounded-2xl bg-zinc-800 p-12 shadow-sm relative overflow-hidden">
+                    <h2 class="text-2xl font-bold text-zinc-100">Únete a la nueva era de emprendedores</h2>
+                    <p class="mt-4 text-zinc-400">Prueba gratuita de 60 días. Sin compromisos, solo resultados.</p>
+                    <div class="mt-8">
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="inline-block rounded-lg bg-orange-700 px-8 py-3 text-sm font-bold text-zinc-100 hover:bg-orange-600 transition">
+                                Crear mi cuenta gratuita
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <footer class="text-center py-10 border-t border-white/5 text-gray-500 text-sm">
-            &copy; {{ date('Y') }} EmprendoSys. Desarrollado para emprendedores reales.
+        <footer class="py-12 text-center text-zinc-400 text-[10px] font-bold uppercase tracking-[0.4em]">
+            &copy; {{ date('Y') }} EmprendoSys — Interfaz Optimizada
         </footer>
     </body>
 </html>
