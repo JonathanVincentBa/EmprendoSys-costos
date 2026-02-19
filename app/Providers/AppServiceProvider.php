@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Forzar HTTPS si no estamos en entorno local (como en Railway)
-        if (config('app.env') !== 'local') {
+        if (config('app.env') !== 'production') {
             URL::forceScheme('https');
         }
         
