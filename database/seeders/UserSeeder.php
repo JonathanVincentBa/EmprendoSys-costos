@@ -12,7 +12,8 @@ class UserSeeder extends Seeder
     {
         if (!$companyId) return;
 
-        $user = User::updateOrCreate(
+        // 1. Crear ADMIN de la empresa
+        $admin = User::updateOrCreate(
             ['email' => "admin.empresa{$companyId}@test.com"],
             [
                 'name' => "Admin Empresa {$companyId}",
@@ -21,7 +22,22 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+        $admin->assignRole('admin');
 
-        $user->assignRole('admin');
+        // 2. Crear 3 VENDEDORES por cada empresa
+        for ($i = 1; $i <= 3; $i++) {
+            $vendedor = User::updateOrCreate(
+                ['email' => "vendedor{$i}.empresa{$companyId}@test.com"],
+                [
+                    'name' => "Vendedor {$i} - Empresa {$companyId}",
+                    'password' => Hash::make('password'),
+                    'company_id' => $companyId,
+                    'email_verified_at' => now(),
+                ]
+            );
+            
+            // Importante: Verifica que el rol se llame exactamente 'vendedor'
+            $vendedor->assignRole('vendedor');
+        }
     }
 }
