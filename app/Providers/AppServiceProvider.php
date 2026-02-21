@@ -27,11 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Forzar HTTPS si no estamos en entorno local (como en Railway)
-        if (config('app.env') !== 'production') {
+        // Cambia el operador a '===' para producción
+        if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
-        
+
         $this->configureDefaults();
 
         // Registro de Observers
@@ -54,14 +54,15 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
+        Password::defaults(
+            fn(): ?Password => app()->isProduction()
+                ? Password::min(12)
                 ->mixedCase()
                 ->letters()
                 ->numbers()
                 ->symbols()
                 ->uncompromised()
-            : null
+                : null
         );
     }
 }
