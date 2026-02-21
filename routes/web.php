@@ -38,41 +38,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
 
         $lowStockProducts = Product::whereColumn('current_stock', '<=', 'minimum_stock_level')->get();
-        $todaySales = Sale::whereDate('sale_date', Carbon::today())
-            ->where('status', 'completed')
-            ->sum('total');
-
-        return view('dashboard', compact('lowStockProducts', 'todaySales'));
+        return view('dashboard', compact('lowStockProducts'));
     })->name('dashboard');
 
-    // --- SECCIÓN ADMINISTRACIÓN GLOBAL ---
-    Route::middleware(['can:ver empresas'])->prefix('administracion')->group(function () {
-        Route::get('/empresas', Company::class)->name('admin.companies');
-        Route::get('/administracion/usuarios', Users::class)->name('users.index');
+    // --- SECCIÓN: ADMINISTRACIÓN Y CATÁLOGOS (Solo Admin) ---
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin/empresas', Company::class)->name('admin.companies');
+        Route::get('/admin/usuarios', Users::class)->name('admin.users');
+
+        // Módulo de Costos y Productos
+        Route::prefix('productos')->group(function () {
+            Route::get('/asistente-maestro', ProductWizard::class)->name('product.wizard');
+            Route::get('/productos', Products::class)->name('products.index');
+            Route::get('/productos/{product}/receta', RecipeManager::class)->name('products.recipe');
+
+            // Catálogos
+            Route::get('raw-materials', RawMaterials::class)->name('raw-materials.index');
+            Route::get('packaging', PackagingMaterials::class)->name('packaging.index');
+            Route::get('supplies', Supplies::class)->name('supplies.index');
+            Route::get('overhead-config', OverheadConfigs::class)->name('overhead-config.index');
+            Route::get('labor-costs', LaborCosts::class)->name('labor-costs.index');
+        });
     });
 
-    // --- SECCIÓN MI EMPRESA (Tenant) ---
-    // Cambiamos 'can' por 'role_or_permission' para dar acceso total al Super-Admin
-    Route::get('/mi-empresa', Company::class)
-        ->name('my.company')
-        ->middleware('role_or_permission:super-admin|editar mi empresa');
-
-    // --- SECCIÓN: PRODUCCIÓN Y CATÁLOGOS ---
-    Route::middleware(['can:gestionar productos'])->group(function () {
-        Route::get('/asistente-maestro', ProductWizard::class)->name('product.wizard');
-        Route::get('/productos', Products::class)->name('products.index');
-        Route::get('/productos/{product}/receta', RecipeManager::class)->name('products.recipe');
-
-        // Catálogos
-        Route::get('raw-materials', RawMaterials::class)->name('raw-materials.index');
-        Route::get('packaging', PackagingMaterials::class)->name('packaging.index');
-        Route::get('supplies', Supplies::class)->name('supplies.index');
-        Route::get('overhead-config', OverheadConfigs::class)->name('overhead-config.index');
-        Route::get('labor-costs', LaborCosts::class)->name('labor-costs.index');
-    });
-
-    // --- SECCIÓN: VENTAS Y CLIENTES ---
-    Route::middleware(['can:realizar ventas'])->group(function () {
+    // --- SECCIÓN: VENTAS Y CLIENTES (Admin o Vendedor) ---
+    Route::middleware(['role:admin|vendedor'])->group(function () {
         Route::get('/ventas', PointOfSale::class)->name('sales.pos');
         Route::get('/clientes', Customers::class)->name('clients.index');
         Route::get('/facturacion', function () {
@@ -83,10 +73,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/reset-db-12345', function () {
     /** @var \App\Models\User $user */
-        $user = Auth::user();
+    $user = Auth::user();
     if ($user?->hasRole('super-admin')) {
-        Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
-        return "Base de datos reseteada con éxito.";
+        Artisan::call('migrate:fresh --seed --force');
+        return 'Base de datos reseteada';
     }
-    return "No autorizado.";
+    abort(403);
 });
