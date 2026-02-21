@@ -19,20 +19,20 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// Ruta de bienvenida
+// --- RUTA PÚBLICA ---
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// --- RUTAS PROTEGIDAS POR AUTENTICACIÓN ---
+// --- RUTAS PROTEGIDAS (Requieren autenticación) ---
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard General con redirección para Super-Admin
+    // --- DASHBOARD (Panel principal) ---
     Route::get('dashboard', function () {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Redirección basada en rol
+        // Redirección especial para administradores globales
         if ($user->hasRole('super-admin')) {
             return redirect()->route('admin.companies');
         }
@@ -45,25 +45,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard', compact('lowStockProducts', 'todaySales'));
     })->name('dashboard');
 
-    // --- SECCIÓN ADMINISTRACIÓN GLOBAL ---
+    // --- SECCIÓN: ADMINISTRACIÓN GLOBAL (Supervisores/Admin) ---
     Route::middleware(['can:ver empresas'])->prefix('administracion')->group(function () {
         Route::get('/empresas', Company::class)->name('admin.companies');
         Route::get('/administracion/usuarios', Users::class)->name('users.index');
     });
 
-    // --- SECCIÓN MI EMPRESA (Tenant) ---
-    // Cambiamos 'can' por 'role_or_permission' para dar acceso total al Super-Admin
+    // --- SECCIÓN: CONFIGURACIÓN DE TENANT (Empresa actual) ---
     Route::get('/mi-empresa', Company::class)
         ->name('my.company')
         ->middleware('role_or_permission:super-admin|editar mi empresa');
 
-    // --- SECCIÓN: PRODUCCIÓN Y CATÁLOGOS ---
+    // --- SECCIÓN: PRODUCCIÓN Y CATÁLOGOS (Gestión técnica) ---
+    // Nota: Aquí podrías añadir '|role:vendedor' si quieres que el vendedor vea catálogos
     Route::middleware(['can:gestionar productos'])->group(function () {
         Route::get('/asistente-maestro', ProductWizard::class)->name('product.wizard');
         Route::get('/productos', Products::class)->name('products.index');
         Route::get('/productos/{product}/receta', RecipeManager::class)->name('products.recipe');
 
-        // Catálogos
+        // Sub-Catálogos
         Route::get('raw-materials', RawMaterials::class)->name('raw-materials.index');
         Route::get('packaging', PackagingMaterials::class)->name('packaging.index');
         Route::get('supplies', Supplies::class)->name('supplies.index');
@@ -71,7 +71,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('labor-costs', LaborCosts::class)->name('labor-costs.index');
     });
 
-    // --- SECCIÓN: VENTAS Y CLIENTES ---
+    // --- SECCIÓN: VENTAS Y CLIENTES (Acceso operativo) ---
+    // PARA EL VENDEDOR: Puedes cambiar este middleware a:
+    // Route::middleware(['role_or_permission:super-admin|vendedor|realizar ventas'])
     Route::middleware(['can:realizar ventas'])->group(function () {
         Route::get('/ventas', PointOfSale::class)->name('sales.pos');
         Route::get('/clientes', Customers::class)->name('clients.index');
@@ -81,9 +83,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
+// --- RUTA DE MANTENIMIENTO ---
 Route::get('/reset-db-12345', function () {
     /** @var \App\Models\User $user */
-        $user = Auth::user();
+    $user = Auth::user();
     if ($user?->hasRole('super-admin')) {
         Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
         return "Base de datos reseteada con éxito.";
