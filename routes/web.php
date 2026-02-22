@@ -53,6 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // --- ADMINISTRACIÓN DE EMPRESA (Admin y Super-Admin) ---
     Route::middleware(['role:super-admin|admin'])->prefix('administracion')->group(function () {
+        Route::get('/mi-empresa', Company::class)->name('my.company');
         Route::get('/empresas', Company::class)->name('admin.companies');
         Route::get('/usuarios', Users::class)->name('admin.users');
     });

@@ -36,7 +36,7 @@
                     @endif
 
                     @can('ver usuarios')
-                        <flux:sidebar.item icon="users" :href="route('users.index')" wire:navigate>Gestionar Usuarios</flux:sidebar.item>
+                        <flux:sidebar.item icon="users" :href="route('admin.users')" wire:navigate>Gestionar Usuarios</flux:sidebar.item>
                     @endcan
 
                     {{-- NUEVO: Opción exclusiva para Super-Admin --}}
