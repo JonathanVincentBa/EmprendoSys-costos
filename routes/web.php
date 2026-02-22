@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Administracion\Company;
+use App\Livewire\Administracion\RolesManager;
 use App\Livewire\Administracion\Users;
 use App\Livewire\Catalogos\LaborCosts;
 use App\Livewire\Catalogos\OverheadConfigs;
@@ -45,25 +46,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard', compact('lowStockProducts', 'todaySales'));
     })->name('dashboard');
 
-    // --- SECCIÓN: ADMINISTRACIÓN GLOBAL (Supervisores/Admin) ---
-    Route::middleware(['can:ver empresas'])->prefix('administracion')->group(function () {
+    // --- SECCIÓN: ADMINISTRACIÓN GLOBAL (Solo Super-Admin/Admin) ---
+    Route::middleware(['role:super-admin|admin'])->prefix('administracion')->group(function () {
         Route::get('/empresas', Company::class)->name('admin.companies');
-        Route::get('/administracion/usuarios', Users::class)->name('users.index');
+        Route::get('/usuarios', Users::class)->name('admin.users');
+        Route::get('/roles', RolesManager::class)->name('admin.roles');
     });
 
-    // --- SECCIÓN: CONFIGURACIÓN DE TENANT (Empresa actual) ---
+    // --- SECCIÓN: CONFIGURACIÓN DE TENANT ---
     Route::get('/mi-empresa', Company::class)
         ->name('my.company')
         ->middleware('role_or_permission:super-admin|editar mi empresa');
 
-    // --- SECCIÓN: PRODUCCIÓN Y CATÁLOGOS (Gestión técnica) ---
-    // Nota: Aquí podrías añadir '|role:vendedor' si quieres que el vendedor vea catálogos
-    Route::middleware(['can:gestionar productos'])->group(function () {
+    // --- SECCIÓN: PRODUCCIÓN Y CATÁLOGOS (Admin/Super-Admin) ---
+    Route::middleware(['role:super-admin|admin'])->group(function () {
         Route::get('/asistente-maestro', ProductWizard::class)->name('product.wizard');
         Route::get('/productos', Products::class)->name('products.index');
         Route::get('/productos/{product}/receta', RecipeManager::class)->name('products.recipe');
 
-        // Sub-Catálogos
         Route::get('raw-materials', RawMaterials::class)->name('raw-materials.index');
         Route::get('packaging', PackagingMaterials::class)->name('packaging.index');
         Route::get('supplies', Supplies::class)->name('supplies.index');
@@ -71,10 +71,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('labor-costs', LaborCosts::class)->name('labor-costs.index');
     });
 
-    // --- SECCIÓN: VENTAS Y CLIENTES (Acceso operativo) ---
-    // PARA EL VENDEDOR: Puedes cambiar este middleware a:
-    // Route::middleware(['role_or_permission:super-admin|vendedor|realizar ventas'])
-    Route::middleware(['can:realizar ventas'])->group(function () {
+    // --- SECCIÓN: VENTAS Y CLIENTES (Acceso para Admin, Super-Admin y Vendedor) ---
+    Route::middleware(['role:super-admin|admin|vendedor'])->group(function () {
         Route::get('/ventas', PointOfSale::class)->name('sales.pos');
         Route::get('/clientes', Customers::class)->name('clients.index');
         Route::get('/facturacion', function () {
