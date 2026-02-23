@@ -8,14 +8,20 @@ use Spatie\Permission\Models\Permission;
 
 class RolesManager extends Component
 {
-    public $newPermission;
-    public $roleId;
-    public $permissions = []; 
+    public $roles;
     public $allPermissions;
+    public $selectedRoleName = '';
+    public $newPermission = '';
+    public $roleId = null;
+    public $permissions = [];
+
+    public $editingPermissionId = null;
+    public $editPermissionName = '';
 
     public function mount()
     {
         $this->allPermissions = Permission::all();
+        $this->roles = Role::all();
     }
 
     public function createPermission()
@@ -26,24 +32,50 @@ class RolesManager extends Component
         $this->allPermissions = Permission::all();
     }
 
+    public function deletePermission($id)
+    {
+        Permission::findById($id)->delete();
+        $this->allPermissions = Permission::all();
+    }
+
+    public function editPermission($id)
+    {
+        $permission = Permission::findById($id);
+        $this->editingPermissionId = $id;
+        $this->editPermissionName = $permission->name;
+    }
+
+    public function updatePermissionName()
+    {
+        $permission = Permission::findById($this->editingPermissionId);
+        $permission->update(['name' => $this->editPermissionName]);
+        $this->editingPermissionId = null;
+        $this->allPermissions = Permission::all();
+    }
+
     public function selectRole($id)
     {
         $this->roleId = $id;
         $role = Role::findById($id);
+        $this->selectedRoleName = $role->name;
         $this->permissions = $role->permissions->pluck('name')->toArray();
     }
 
     public function updatePermissions()
     {
-        $role = Role::findById($this->roleId);
-        $role->syncPermissions($this->permissions);
-        session()->flash('message', 'Permisos actualizados con éxito.');
+        if ($this->roleId) {
+            $role = Role::findById($this->roleId);
+            $role->syncPermissions($this->permissions);
+            
+            $this->dispatch('swal', [
+                'type' => 'success',
+                'message' => 'Permisos actualizados con éxito.'
+            ]);
+        }
     }
 
     public function render()
     {
-        return view('livewire.administracion.roles-manager', [
-            'roles' => Role::all()
-        ]);
+        return view('livewire.administracion.roles-manager');
     }
 }

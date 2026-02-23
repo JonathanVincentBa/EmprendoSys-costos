@@ -3,6 +3,7 @@
 namespace App\Livewire\Administracion;
 
 use App\Models\Company as CompanyModel;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -74,10 +75,10 @@ class Company extends Component
         if ($company) {
             $company->status = ($company->status === 'active') ? 'suspended' : 'active';
             $company->save();
-            
+
             $this->dispatch('swal', [
-                'message' => 'Estado de empresa actualizado',
-                'type'    => 'success'
+                'type' => 'success',
+                'message' => 'Estado de empresa actualizado a: ' . ucfirst($company->status)
             ]);
         }
     }
@@ -91,7 +92,7 @@ class Company extends Component
         if ($company) {
             // Opcional: Eliminar logo del storage
             if ($company->logo) Storage::disk('public')->delete($company->logo);
-            
+
             $company->delete();
             $this->dispatch('swal', [
                 'message' => 'Empresa eliminada correctamente',
@@ -102,9 +103,9 @@ class Company extends Component
 
     public function save()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
-        
+
         $this->validate([
             'name'  => 'required|min:3',
             'ruc'   => 'required|digits:13',
@@ -147,12 +148,12 @@ class Company extends Component
 
     public function render()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
-        
+
         return view('livewire.administracion.company', [
-            'companies' => $user->hasRole('super-admin') 
-                ? CompanyModel::paginate(10) 
+            'companies' => $user->hasRole('super-admin')
+                ? CompanyModel::paginate(10)
                 : collect([])
         ]);
     }

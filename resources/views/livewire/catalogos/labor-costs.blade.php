@@ -4,7 +4,7 @@
             <flux:heading size="xl">Mano de Obra</flux:heading>
             <flux:subheading>Configura los roles de producción y sus costos asociados.</flux:subheading>
         </div>
-        <flux:button wire:click="create" variant="primary" icon="plus">Nuevo Rol</flux:button>
+        <flux:button wire:click="create" variant="primary" icon="plus">Nuevo Costo Laboral</flux:button>
     </div>
 
     <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden">
@@ -40,7 +40,7 @@
         <div class="p-4 border-t border-zinc-200 dark:border-zinc-700">{{ $roles->links() }}</div>
     </div>
 
-    <flux:modal wire:model="isOpen" class="md:w-[35rem]">
+    <flux:modal wire:model="isOpen" class="md:w-140">
         <form wire:submit="store" class="space-y-6">
             <flux:heading size="lg">{{ $laborId ? 'Editar Rol' : 'Nuevo Rol de Producción' }}</flux:heading>
 
@@ -58,7 +58,7 @@
 
             <div class="flex gap-2 justify-end">
                 <flux:modal.close><flux:button variant="ghost">Cancelar</flux:button></flux:modal.close>
-                <flux:button type="submit" variant="primary">Guardar Rol</flux:button>
+                <flux:button type="submit" variant="primary">Guardar</flux:button>
             </div>
         </form>
     </flux:modal>
