@@ -41,12 +41,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        // 1. Super-Admin -> A la gestión de empresas
         if ($user->hasRole('super-admin')) {
             return redirect()->route('admin.companies');
         }
-        return view('dashboard');
-    })->name('dashboard');
 
+        // 2. Vendedor -> Directo al Punto de Venta
+        if ($user->hasRole('vendedor')) {
+            return redirect()->route('sales.pos');
+        }
+
+        // 3. Admin -> Al Dashboard con estadísticas (necesitas pasar las variables)
+        $company_id = $user->company_id;
+        $todaySales = \App\Models\Sale::where('company_id', $company_id)
+            ->whereDate('created_at', now())
+            ->where('status', 'completed')
+            ->sum('total');
+
+        $completedOrders = \App\Models\Sale::where('company_id', $company_id)
+            ->whereDate('created_at', now())
+            ->where('status', 'completed')
+            ->count();
+
+        $lowStockProducts = \App\Models\Product::where('company_id', $company_id)
+            ->whereColumn('current_stock', '<=', 'minimum_stock_level')
+            ->get();
+
+        return view('dashboard', compact('todaySales', 'completedOrders', 'lowStockProducts'));
+    })->name('dashboard');
 
     /*
     |----------------------------------------------------------------------
@@ -108,7 +130,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return '<h1 class="p-6 text-2xl">Módulo SRI (Próximamente)</h1>';
         })->name('invoices.index');
     });
-
 });
 
 /*
