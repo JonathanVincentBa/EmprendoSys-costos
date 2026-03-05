@@ -39,7 +39,8 @@
                 @can('ver administracion')
                     <flux:sidebar.group :heading="__('Administración')" class="grid">
                         @can('ver empresas')
-                            <flux:sidebar.item icon="building-office" :href="route('admin.companies')" wire:navigate>Empresas
+                            <flux:sidebar.item icon="building-office" :href="route('admin.companies')" wire:navigate>
+                                {{ auth()->user()->hasRole('super-admin') ? 'Empresas' : 'Mi Empresa' }}
                             </flux:sidebar.item>
                         @endcan
                         @can('ver usuarios')

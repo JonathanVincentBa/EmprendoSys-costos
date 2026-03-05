@@ -13,6 +13,8 @@ use App\Livewire\CostoProduccion\RecipeManager;
 use App\Livewire\CostoProduccion\ProductWizard;
 use App\Livewire\Sales\Customers;
 use App\Livewire\Sales\PointOfSale;
+use App\Models\Product;
+use App\Models\Sale;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -38,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | Redirección inteligente basada en el rol del usuario.
     */
     Route::get('dashboard', function () {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         // 1. Super-Admin -> A la gestión de empresas
@@ -53,17 +55,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // 3. Admin -> Al Dashboard con estadísticas (necesitas pasar las variables)
         $company_id = $user->company_id;
-        $todaySales = \App\Models\Sale::where('company_id', $company_id)
+        $todaySales = Sale::where('company_id', $company_id)
             ->whereDate('created_at', now())
             ->where('status', 'completed')
             ->sum('total');
 
-        $completedOrders = \App\Models\Sale::where('company_id', $company_id)
+        $completedOrders = Sale::where('company_id', $company_id)
             ->whereDate('created_at', now())
             ->where('status', 'completed')
             ->count();
 
-        $lowStockProducts = \App\Models\Product::where('company_id', $company_id)
+        $lowStockProducts = Product::where('company_id', $company_id)
             ->whereColumn('current_stock', '<=', 'minimum_stock_level')
             ->get();
 
@@ -77,7 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | Gestión de empresas, roles del sistema y permisos globales.
     */
     Route::middleware(['role:super-admin'])->group(function () {
-        Route::get('admin/companies', Company::class)->name('admin.companies');
+        /* Route::get('admin/companies', Company::class)->name('admin.companies'); */
         Route::get('admin/roles', RolesManager::class)->name('admin.roles');
     });
 
@@ -89,6 +91,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::middleware(['role:super-admin|admin'])->group(function () {
         Route::get('users', Users::class)->name('users.index');
+        Route::get('admin/companies', Company::class)->name('admin.companies');
         Route::get('company-profile', Company::class)->name('admin.company.profile');
     });
 
@@ -138,7 +141,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/reset-db-12345', function () {
-    /** @var \App\Models\User $user */
+    /** @var User $user */
     $user = Auth::user();
     if ($user?->hasRole('super-admin')) {
         Artisan::call('migrate:fresh --seed');
