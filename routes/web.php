@@ -13,65 +13,94 @@ use App\Livewire\CostoProduccion\RecipeManager;
 use App\Livewire\CostoProduccion\ProductWizard;
 use App\Livewire\Sales\Customers;
 use App\Livewire\Sales\PointOfSale;
-use App\Models\Product;
-use App\Models\Sale;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// 1. RUTA PÚBLICA
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// 1. RUTA PÚBLICA (Landing page)
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// 2. RUTAS PROTEGIDAS (Requieren Login)
+// 2. RUTAS PROTEGIDAS (Requieren Login y Verificación)
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // --- DASHBOARD ---
+    /*
+    |----------------------------------------------------------------------
+    | DASHBOARD CENTRAL
+    |----------------------------------------------------------------------
+    | Redirección inteligente basada en el rol del usuario.
+    */
     Route::get('dashboard', function () {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Redirección pura: Si es super-admin, mándalo a empresas
         if ($user->hasRole('super-admin')) {
             return redirect()->route('admin.companies');
         }
-
-        $lowStockProducts = Product::whereColumn('current_stock', '<=', 'minimum_stock_level')->get();
-        $todaySales = Sale::whereDate('sale_date', Carbon::today())
-            ->where('status', 'completed')
-            ->sum('total');
-
-        return view('dashboard', compact('lowStockProducts', 'todaySales'));
+        return view('dashboard');
     })->name('dashboard');
 
-    // --- ADMINISTRACIÓN GLOBAL (Solo Super-Admin) ---
-    Route::middleware(['role:super-admin'])->prefix('administracion')->group(function () {
-        Route::get('/roles', RolesManager::class)->name('admin.roles');
+
+    /*
+    |----------------------------------------------------------------------
+    | ADMINISTRACIÓN GLOBAL (Solo Super-Admin)
+    |----------------------------------------------------------------------
+    | Gestión de empresas, roles del sistema y permisos globales.
+    */
+    Route::middleware(['role:super-admin'])->group(function () {
+        Route::get('admin/companies', Company::class)->name('admin.companies');
+        Route::get('admin/roles', RolesManager::class)->name('admin.roles');
     });
 
-    // --- ADMINISTRACIÓN DE EMPRESA (Admin y Super-Admin) ---
-    Route::middleware(['role:super-admin|admin'])->prefix('administracion')->group(function () {
-        Route::get('/mi-empresa', Company::class)->name('my.company');
-        Route::get('/empresas', Company::class)->name('admin.companies');
-        Route::get('/usuarios', Users::class)->name('admin.users');
-    });
 
-    // --- PRODUCCIÓN Y CATÁLOGOS ---
+    /*
+    |----------------------------------------------------------------------
+    | GESTIÓN DE USUARIOS (Super-Admin y Admin)
+    |----------------------------------------------------------------------
+    */
     Route::middleware(['role:super-admin|admin'])->group(function () {
+        Route::get('users', Users::class)->name('users.index');
+        Route::get('company-profile', Company::class)->name('admin.company.profile');
+    });
+
+
+    /*
+    |----------------------------------------------------------------------
+    | CATÁLOGOS Y COSTOS (Super-Admin y Admin)
+    |----------------------------------------------------------------------
+    | Módulos técnicos para configurar materias primas, empaques y costos
+    | de producción. El vendedor NO tiene acceso aquí.
+    */
+    Route::middleware(['role:super-admin|admin'])->group(function () {
+        // Producción y Recetas
         Route::get('/asistente-maestro', ProductWizard::class)->name('product.wizard');
         Route::get('/productos', Products::class)->name('products.index');
         Route::get('/productos/{product}/receta', RecipeManager::class)->name('products.recipe');
 
+        // Inventarios Técnicos
         Route::get('raw-materials', RawMaterials::class)->name('raw-materials.index');
         Route::get('packaging', PackagingMaterials::class)->name('packaging.index');
         Route::get('supplies', Supplies::class)->name('supplies.index');
+
+        // Configuraciones de Costeo
         Route::get('overhead-config', OverheadConfigs::class)->name('overhead-config.index');
         Route::get('labor-costs', LaborCosts::class)->name('labor-costs.index');
     });
 
-    // --- VENTAS (Permite acceso a Vendedor) ---
+
+    /*
+    |----------------------------------------------------------------------
+    | ÁREA COMERCIAL / VENTAS (Super-Admin, Admin y Vendedor)
+    |----------------------------------------------------------------------
+    | Módulos a los que el Vendedor tiene permiso para operar.
+    */
     Route::middleware(['role:super-admin|admin|vendedor'])->group(function () {
         Route::get('/ventas', PointOfSale::class)->name('sales.pos');
         Route::get('/clientes', Customers::class)->name('clients.index');
@@ -79,15 +108,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return '<h1 class="p-6 text-2xl">Módulo SRI (Próximamente)</h1>';
         })->name('invoices.index');
     });
+
 });
 
-// 3. RUTA DE MANTENIMIENTO
+/*
+|--------------------------------------------------------------------------
+| RUTAS DE MANTENIMIENTO (Solo Super-Admin)
+|--------------------------------------------------------------------------
+*/
 Route::get('/reset-db-12345', function () {
     /** @var \App\Models\User $user */
     $user = Auth::user();
     if ($user?->hasRole('super-admin')) {
-        Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
-        return "Base de datos reseteada con éxito.";
+        Artisan::call('migrate:fresh --seed');
+        return "Base de datos reseteada y sembrada con éxito.";
     }
-    return "No autorizado.";
+    abort(403);
 });

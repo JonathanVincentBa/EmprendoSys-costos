@@ -3,6 +3,7 @@
 
 <head>
     @include('partials.head')
+    {{-- SweetAlert2 centralizado para toda la App --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         @media (min-width: 1024px) {
@@ -17,7 +18,9 @@
 
     <div class="flex min-h-screen w-full">
 
-        {{-- Sidebar --}}
+        {{-- ===========================================================
+             1. SIDEBAR (Escritorio y Tablet)
+             =========================================================== --}}
         <flux:sidebar sticky collapsible="mobile"
             class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
@@ -26,114 +29,127 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                {{-- Plataforma --}}
+                {{-- BLOQUE: PLATAFORMA --}}
                 <flux:sidebar.group :heading="__('Plataforma')" class="grid">
                     <flux:sidebar.item icon="home" :href="route('dashboard')" wire:navigate>Dashboard
                     </flux:sidebar.item>
+                </flux:sidebar.group>
 
-                    @can('ver empresas')
-                        <flux:sidebar.item icon="building-office" :href="route('admin.companies')" wire:navigate>Gestión
-                            Empresas</flux:sidebar.item>
-                    @endcan
+                {{-- BLOQUE: ADMINISTRACIÓN (Control de Acceso) --}}
+                @can('ver administracion')
+                    <flux:sidebar.group :heading="__('Administración')" class="grid">
+                        @can('ver empresas')
+                            <flux:sidebar.item icon="building-office" :href="route('admin.companies')" wire:navigate>Empresas
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('ver usuarios')
+                            <flux:sidebar.item icon="users" :href="route('users.index')" wire:navigate>Usuarios
+                            </flux:sidebar.item>
+                        @endcan
+                        @can('ver roles')
+                            <flux:sidebar.item icon="shield-check" :href="route('admin.roles')" wire:navigate>Roles y Permisos
+                            </flux:sidebar.item>
+                        @endcan
+                    </flux:sidebar.group>
+                @endcan
 
-                    @if (auth()->user()->hasRole('super-admin') || auth()->user()->can('editar mi empresa'))
-                        <flux:sidebar.item icon="cog-6-tooth" :href="route('my.company')" wire:navigate>Mi Empresa
+                {{-- BLOQUE: PRODUCCIÓN (Materias Primas y Costos) --}}
+                @can('ver catalogos')
+                    <flux:sidebar.group :heading="__('Producción y Costos')" class="grid">
+                        <flux:sidebar.item icon="beaker" :href="route('raw-materials.index')" wire:navigate>Materias Primas
                         </flux:sidebar.item>
-                    @endif
-
-                    @can('ver usuarios')
-                        <flux:sidebar.item icon="users" :href="route('admin.users')" wire:navigate>Gestionar Usuarios
+                        <flux:sidebar.item icon="archive-box" :href="route('packaging.index')" wire:navigate>
+                            Insumos/Empaques</flux:sidebar.item>
+                        <flux:sidebar.item icon="circle-stack" :href="route('supplies.index')" wire:navigate>Suministros
                         </flux:sidebar.item>
-                    @endcan
+                        <flux:sidebar.separator />
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('products.index')" wire:navigate>
+                            Productos/Recetas</flux:sidebar.item>
+                        <flux:sidebar.item icon="wrench-screwdriver" :href="route('labor-costs.index')" wire:navigate>Mano
+                            de Obra</flux:sidebar.item>
+                        <flux:sidebar.item icon="presentation-chart-line" :href="route('overhead-config.index')"
+                            wire:navigate>Gastos Indirectos</flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endcan
 
-                    {{-- NUEVO: Opción exclusiva para Super-Admin --}}
-                    @if (auth()->user()->hasRole('super-admin'))
-                        <flux:sidebar.item icon="shield-check" :href="route('admin.roles')" wire:navigate>Roles y
-                            Permisos</flux:sidebar.item>
-                    @endif
-                </flux:sidebar.group>
-
-                {{-- Costos de Producción --}}
-                <flux:sidebar.group :heading="__('Costos de Producción')" class="grid">
-                    <flux:sidebar.item icon="sparkles" :href="route('product.wizard')" wire:navigate>Asistente Maestro
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="cube" :href="route('products.index')" wire:navigate>Productos
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-
-                {{-- Ventas --}}
-                <flux:sidebar.group :heading="__('Ventas')" class="grid">
-                    <flux:sidebar.item icon="shopping-cart" :href="route('sales.pos')" wire:navigate>Punto de Venta
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="user-group" :href="route('clients.index')" wire:navigate>Clientes
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-
-                {{-- Configuración --}}
-                <flux:sidebar.group :heading="__('Configuración')" class="grid">
-                    <flux:sidebar.item icon="beaker" :href="route('raw-materials.index')" wire:navigate>Materias
-                        Primas</flux:sidebar.item>
-                    <flux:sidebar.item icon="archive-box" :href="route('packaging.index')" wire:navigate>Empaques
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="bolt" :href="route('supplies.index')" wire:navigate>Suministros
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="calculator" :href="route('overhead-config.index')" wire:navigate>Costos
-                        Indirectos</flux:sidebar.item>
-                    <flux:sidebar.item icon="identification" :href="route('labor-costs.index')" wire:navigate>Mano de
-                        Obra</flux:sidebar.item>
-                </flux:sidebar.group>
-
-                {{-- BOTÓN CERRAR SESIÓN --}}
-                <flux:sidebar.group class="mt-4">
-                    <flux:sidebar.item icon="arrow-right-start-on-rectangle" variant="danger" class="cursor-pointer"
-                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        Cerrar Sesión
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
+                {{-- BLOQUE: COMERCIAL (Ventas y Clientes) --}}
+                @can('ver ventas')
+                    <flux:sidebar.group :heading="__('Comercial')" class="grid">
+                        <flux:sidebar.item icon="shopping-cart" :href="route('sales.pos')" wire:navigate>Punto de Venta
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="user-group" :href="route('clients.index')" wire:navigate>Clientes
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="document-text" :href="route('invoices.index')" wire:navigate>Facturación
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endcan
             </flux:sidebar.nav>
 
             <flux:spacer />
 
-            <div class="p-4 border-t border-zinc-200 dark:border-zinc-700">
-                <flux:profile :name="auth()->user()->name" :initials="auth()->user()->initials()" class="w-full" />
-            </div>
+            {{-- FOOTER DEL SIDEBAR (Perfil en Desktop) --}}
+            <flux:dropdown position="top" align="start" class="max-lg:hidden">
+                <flux:profile :name="auth()->user()->name" :initials="auth()->user()->name[0]"
+                    class="cursor-pointer" />
+                <flux:menu>
+                    <flux:menu.item icon="arrow-right-start-on-rectangle"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                        class="cursor-pointer">
+                        Cerrar Sesión
+                    </flux:menu.item>
+                </flux:menu>
+            </flux:dropdown>
         </flux:sidebar>
 
-        <div class="flex-1 flex flex-col min-w-0">
-            <flux:header
-                class="lg:hidden bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 px-4 flex items-center h-16 sticky top-0 z-10">
-                <flux:sidebar.toggle class="-ms-2" icon="bars-3" />
-                <flux:spacer />
-                <flux:profile :initials="auth()->user()->initials()" />
-            </flux:header>
+        {{-- ===========================================================
+             2. NAVBAR MÓVIL (Solo visible en pantallas pequeñas)
+             =========================================================== --}}
+        <flux:header class="lg:hidden border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+            <flux:sidebar.toggle icon="bars-2" />
+            <flux:spacer />
+            <flux:dropdown aling="end">
+                <flux:profile :initials="auth()->user()->name[0]" class="cursor-pointer" />
+                <flux:menu>
+                    <flux:menu.item icon="arrow-right-start-on-rectangle"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        Cerrar Sesión
+                    </flux:menu.item>
+                </flux:menu>
+            </flux:dropdown>
+        </flux:header>
 
-            <main class="flex-1 p-6 lg:p-10 w-full mx-auto max-w-7xl">
-                {{ $slot }}
-            </main>
-        </div>
+        {{-- ===========================================================
+             3. CONTENIDO PRINCIPAL
+             =========================================================== --}}
+        <main class="main-content flex-1 p-4 lg:p-8">
+            {{ $slot }}
+        </main>
+
     </div>
 
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-        @csrf
-    </form>
+    {{-- Formulario Logout --}}
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
     @fluxScripts
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    {{-- ===========================================================
+         4. LÓGICA GLOBAL DE SWEETALERT2
+         =========================================================== --}}
     <script>
-        // 1. Alerta informativa (éxito, error, info)
+        // Alertas Toast (Éxito, Error, Info)
         window.addEventListener('swal', event => {
-            const data = event.detail[0] || event.detail; // Manejo de compatibilidad
+            const data = event.detail[0] || event.detail;
             Swal.fire({
                 title: data.message || 'Proceso exitoso',
                 icon: data.type || 'success',
                 timer: 3000,
+                toast: true,
+                position: 'top-end',
                 showConfirmButton: false
             });
         });
 
-        // 2. Confirmación antes de eliminar
+        // Alertas de Confirmación (Eliminar)
         window.addEventListener('swal:confirm', event => {
             const data = event.detail[0] || event.detail;
             Swal.fire({
@@ -141,12 +157,12 @@
                 text: data.text || 'No podrás revertir esto',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, eliminar'
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Llama al método del componente Livewire
                     Livewire.dispatch(data.nextAction, {
                         id: data.id
                     });
