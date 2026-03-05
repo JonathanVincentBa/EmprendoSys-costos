@@ -62,7 +62,7 @@
                             Insumos/Empaques</flux:sidebar.item>
                         <flux:sidebar.item icon="circle-stack" :href="route('supplies.index')" wire:navigate>Suministros
                         </flux:sidebar.item>
-                        <flux:sidebar.separator />
+                        <flux:separator class="my-2" />
                         <flux:sidebar.item icon="clipboard-document-list" :href="route('products.index')" wire:navigate>
                             Productos/Recetas</flux:sidebar.item>
                         <flux:sidebar.item icon="wrench-screwdriver" :href="route('labor-costs.index')" wire:navigate>Mano
