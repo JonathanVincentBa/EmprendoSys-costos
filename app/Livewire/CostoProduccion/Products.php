@@ -14,8 +14,7 @@ class Products extends Component
     public $isOpen = false;
     public $search = '';
 
-    // PROPIEDADES DEL FORMULARIO
-    // Quitamos "int" y "string" para evitar el error de inicialización
+    // Propiedades sin tipos estrictos y con valores iniciales
     public $productId = null;
     public $name = '';
     public $presentation_ml = 0;
@@ -29,11 +28,17 @@ class Products extends Component
         'is_active' => 'boolean',
     ];
 
+    // ESTO ES CLAVE: Fuerza la inicialización al cargar la página
+    public function mount()
+    {
+        $this->reset(['productId', 'name', 'presentation_ml', 'packaging_type', 'is_active']);
+        $this->packaging_type = 'frasco';
+    }
+
     public function render()
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-
         $query = Product::query();
 
         if ($user && !$user->hasRole('super-admin')) {
@@ -52,13 +57,8 @@ class Products extends Component
     public function create()
     {
         $this->resetValidation();
-        // Reiniciamos a valores manuales para asegurar consistencia
-        $this->productId = null;
-        $this->name = '';
-        $this->presentation_ml = 0;
+        $this->reset(['productId', 'name', 'presentation_ml', 'packaging_type', 'is_active']);
         $this->packaging_type = 'frasco';
-        $this->is_active = true;
-        
         $this->isOpen = true;
     }
 
@@ -92,7 +92,6 @@ class Products extends Component
         );
 
         $this->isOpen = false;
-        
         $this->dispatch('swal', [
             'message' => $this->productId ? 'Producto actualizado' : 'Producto creado',
             'type' => 'success'
