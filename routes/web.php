@@ -149,3 +149,10 @@ Route::get('/reset-db-12345', function () {
     }
     abort(403);
 });
+
+Route::get('/limpiar-todo-sistema', function () {
+    Artisan::call('view:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    return "Sistema limpiado correctamente. Regresa a productos.";
+});
