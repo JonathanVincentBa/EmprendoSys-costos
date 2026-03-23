@@ -14,7 +14,8 @@ class Products extends Component
     public $isOpen = false;
     public $search = '';
 
-    // Propiedades sin tipos estrictos y con valores iniciales
+    // PROPIEDADES DEL FORMULARIO
+    // IMPORTANTE: Quitamos "int", "string", etc. y asignamos valores por defecto
     public $productId = null;
     public $name = '';
     public $presentation_ml = 0;
@@ -28,11 +29,10 @@ class Products extends Component
         'is_active' => 'boolean',
     ];
 
-    // ESTO ES CLAVE: Fuerza la inicialización al cargar la página
+    // Forzamos que al cargar el componente todo esté inicializado
     public function mount()
     {
-        $this->reset(['productId', 'name', 'presentation_ml', 'packaging_type', 'is_active']);
-        $this->packaging_type = 'frasco';
+        $this->resetInputFields();
     }
 
     public function render()
@@ -54,11 +54,19 @@ class Products extends Component
         ]);
     }
 
+    private function resetInputFields()
+    {
+        $this->productId = null;
+        $this->name = '';
+        $this->presentation_ml = 0;
+        $this->packaging_type = 'frasco';
+        $this->is_active = true;
+    }
+
     public function create()
     {
         $this->resetValidation();
-        $this->reset(['productId', 'name', 'presentation_ml', 'packaging_type', 'is_active']);
-        $this->packaging_type = 'frasco';
+        $this->resetInputFields();
         $this->isOpen = true;
     }
 
