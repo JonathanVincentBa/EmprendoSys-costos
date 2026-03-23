@@ -34,7 +34,7 @@ class PointOfSale extends Component
         $product = Product::find($id);
         if ($product) {
             $this->selectedProduct = $product;
-            $this->unit_price = $product->price ?? 0; 
+            $this->unit_price = $product->price ?? 0;
             $this->productSearch = $product->name;
         }
     }
@@ -104,7 +104,6 @@ class PointOfSale extends Component
 
             $this->reset(['items', 'selectedCustomer', 'customerSearch', 'productSearch']);
             $this->dispatch('swal', ['message' => '¡Venta guardada con éxito!', 'type' => 'success']);
-
         } catch (\Exception $e) {
             $this->dispatch('swal', ['message' => $e->getMessage(), 'type' => 'error']);
         }
@@ -113,25 +112,93 @@ class PointOfSale extends Component
     public function render()
     {
         $customers = [];
+        // CORRECCIÓN: Usamos Customer::query() para no traer todo a memoria
         if (strlen($this->customerSearch) > 1) {
-            $customers = Customer::all()
+            $customers = Customer::query()
                 ->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->customerSearch . '%')
                         ->orWhere('identification', 'like', '%' . $this->customerSearch . '%');
-                })->limit(5)->get();
+                })
+                ->limit(5)
+                ->get();
         }
 
         $products = [];
+        // CORRECCIÓN: Quitamos el Product::all() que rompe el limit()
         if (strlen($this->productSearch) > 1 && (!$this->selectedProduct || $this->productSearch !== $this->selectedProduct->name)) {
-            $products = Product::all()
+            $products = Product::query()
                 ->where('current_stock', '>', 0)
                 ->where('name', 'like', '%' . $this->productSearch . '%')
-                ->limit(5)->get();
+                ->limit(5)
+                ->get();
         }
 
         return view('livewire.sales.point-of-sale', [
             'customers' => $customers,
             'products' => $products,
+            'total' => collect($this->items)->sum(fn($item) => $item['quantity'] * $item['unit_price'])
         ]);
+    }
+
+    public function store()
+    {
+        // 1. Verificaciones de seguridad y datos
+        if (!$this->selectedCustomer) {
+            $this->dispatch('swal', ['message' => 'Debe seleccionar un cliente', 'type' => 'error']);
+            return;
+        }
+
+        if (empty($this->items)) {
+            $this->dispatch('swal', ['message' => 'El carrito está vacío', 'type' => 'warning']);
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // 2. Crear la cabecera de la venta
+            $sale = Sale::create([
+                'company_id'  => Auth::user()->company_id,
+                'customer_id' => $this->selectedCustomer['id'],
+                'user_id'     => Auth::id(),
+                'total'       => collect($this->items)->sum(fn($i) => $i['quantity'] * $i['unit_price']),
+                'status'      => 'completed',
+                'date'        => now(),
+            ]);
+
+            // 3. Registrar cada producto y descontar stock
+            foreach ($this->items as $item) {
+                // Guardar detalle
+                SaleItem::create([
+                    'sale_id'    => $sale->id,
+                    'product_id' => $item['product_id'],
+                    'quantity'   => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'subtotal'   => $item['quantity'] * $item['unit_price'],
+                ]);
+
+                // Descontar Stock del producto
+                $product = Product::find($item['product_id']);
+                if ($product) {
+                    $product->decrement('current_stock', $item['quantity']);
+                }
+            }
+
+            DB::commit();
+
+            // 4. Limpiar el formulario y avisar al usuario
+            $this->reset(['items', 'selectedCustomer', 'customerSearch', 'productSearch', 'selectedProduct']);
+
+            $this->dispatch('swal', [
+                'message' => '¡Venta y Factura generada con éxito!',
+                'type' => 'success'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('swal', [
+                'message' => 'Error al procesar la venta: ' . $e->getMessage(),
+                'type' => 'error'
+            ]);
+        }
     }
 }

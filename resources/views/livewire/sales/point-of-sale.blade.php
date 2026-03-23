@@ -97,7 +97,7 @@
                 <span class="text-4xl font-black text-white font-mono">${{ number_format(collect($items)->sum('subtotal'), 2) }}</span>
             </div>
             
-            <button wire:click="saveInvoice" wire:loading.attr="disabled" 
+            <button wire:click="store" wire:loading.attr="disabled" 
                     class="w-full md:w-auto px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-black rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.3)] uppercase text-sm flex items-center justify-center gap-3 transition-all hover:-translate-y-1 active:translate-y-0">
                 <span wire:loading.remove>✅ CONFIRMAR Y GUARDAR VENTA</span>
                 <span wire:loading>⌛ PROCESANDO...</span>
