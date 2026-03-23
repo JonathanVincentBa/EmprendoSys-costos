@@ -14,10 +14,11 @@ class Products extends Component
     public $isOpen = false;
     public $search = '';
 
-    // Propiedades del formulario (Sin tipos estrictos para evitar el error de inicialización)
-    public $productId;
-    public $name;
-    public $presentation_ml;
+    // PROPIEDADES DEL FORMULARIO
+    // Quitamos "int" y "string" para evitar el error de inicialización
+    public $productId = null;
+    public $name = '';
+    public $presentation_ml = 0;
     public $packaging_type = 'frasco';
     public $is_active = true;
 
@@ -51,8 +52,13 @@ class Products extends Component
     public function create()
     {
         $this->resetValidation();
-        $this->reset(['productId', 'name', 'presentation_ml', 'packaging_type', 'is_active']);
-        $this->packaging_type = 'frasco'; 
+        // Reiniciamos a valores manuales para asegurar consistencia
+        $this->productId = null;
+        $this->name = '';
+        $this->presentation_ml = 0;
+        $this->packaging_type = 'frasco';
+        $this->is_active = true;
+        
         $this->isOpen = true;
     }
 
@@ -86,8 +92,9 @@ class Products extends Component
         );
 
         $this->isOpen = false;
+        
         $this->dispatch('swal', [
-            'message' => $this->productId ? 'Producto actualizado correctamente' : 'Producto creado con éxito',
+            'message' => $this->productId ? 'Producto actualizado' : 'Producto creado',
             'type' => 'success'
         ]);
     }
