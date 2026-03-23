@@ -15,13 +15,13 @@ class RecipeManager extends Component
 {
     public Product $product;
     public $recipe;
-    
+
     // Datos de la Receta
     public $description, $batch_size_ml;
-    
+
     // Para agregar ingredientes
     public $selected_material_id, $quantity_kg;
-    
+
     // Para agregar procesos y empaques
     public $selected_process_id;
     public $selected_packaging_id, $units_per_batch;
@@ -49,15 +49,23 @@ class RecipeManager extends Component
     public function saveBaseRecipe()
     {
         $this->validate();
-        
-        $this->recipe->fill([
-            'company_id' => Auth::user()->company_id,
-            'description' => $this->description,
-            'batch_size_ml' => $this->batch_size_ml,
+
+        // Usamos updateOrCreate para asegurarnos de que se asocie al producto actual
+        $this->recipe = Recipe::updateOrCreate(
+            [
+                'product_id' => $this->product->id, // CLAVE: Aquí faltaba pasar el ID
+                'company_id' => Auth::user()->company_id
+            ],
+            [
+                'batch_size_ml' => $this->batch_size_ml,
+                'description' => $this->description,
+            ]
+        );
+
+        $this->dispatch('swal', [
+            'message' => 'Configuración de lote actualizada',
+            'type' => 'success'
         ]);
-        
-        $this->recipe->save();
-        $this->dispatch('swal', ['message' => 'Base de receta guardada', 'type' => 'success']);
     }
 
     public function addIngredient()
@@ -86,9 +94,9 @@ class RecipeManager extends Component
 
     public function addProcess()
     {
-        if($this->selected_process_id) {
+        if ($this->selected_process_id) {
             $this->recipe->processes()->attach($this->selected_process_id, [
-                'company_id' => Auth::user()->company_id 
+                'company_id' => Auth::user()->company_id
             ]);
             $this->recipe->load('processes');
         }
@@ -104,7 +112,7 @@ class RecipeManager extends Component
         $this->recipe->packagingMaterials()->attach($this->selected_packaging_id, [
             'units_per_batch' => $this->units_per_batch
         ]);
-        
+
         $this->reset(['selected_packaging_id', 'units_per_batch']);
         $this->recipe->load('packagingMaterials');
     }
