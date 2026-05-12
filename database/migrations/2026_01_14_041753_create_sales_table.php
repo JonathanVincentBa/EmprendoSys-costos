@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->onDelete('cascade');
-            $table->foreignId('customer_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
+            $table->foreignId('customer_id')->nullable('customers')->constrained()->onDelete('set null');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->dateTime('sale_date');
             $table->decimal('total', 10, 2);
             $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');

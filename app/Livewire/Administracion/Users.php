@@ -4,6 +4,8 @@ namespace App\Livewire\Administracion;
 
 use App\Models\User;
 use App\Models\Company;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
@@ -11,9 +13,10 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
 
+
 class Users extends Component
 {
-    use WithPagination;
+    use WithPagination, HasFactory, Notifiable;
 
     // Propiedades de control
     public $search = '';

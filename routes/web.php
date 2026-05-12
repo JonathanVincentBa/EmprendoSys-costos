@@ -13,6 +13,7 @@ use App\Livewire\CostoProduccion\RecipeManager;
 use App\Livewire\CostoProduccion\ProductWizard;
 use App\Livewire\Sales\Customers;
 use App\Livewire\Sales\PointOfSale;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Artisan;
@@ -50,26 +51,47 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // 2. Vendedor -> Directo al Punto de Venta
         if ($user->hasRole('vendedor')) {
-            return redirect()->route('sales.pos');
+            // Obtenemos estadísticas básicas del vendedor para hoy
+            $stats = [
+                'ventas_hoy' => Sale::where('user_id', $user->id)
+                    ->whereDate('created_at', now())
+                    ->sum('total'),
+                'cantidad_ventas' => Sale::where('user_id', $user->id)
+                    ->whereDate('created_at', now())
+                    ->count(),
+                'clientes_nuevos' => Customer::where('company_id', $user->company_id)
+                    ->whereDate('created_at', now())
+                    ->count(),
+                'ultimas_ventas' => Sale::where('user_id', $user->id)
+                    ->whereDate('created_at', now())
+                    ->with('customer')
+                    ->latest()
+                    ->take(5)
+                    ->get(),
+            ];
+
+            return view('dashboard-vendedor', compact('stats'));
         }
 
         // 3. Admin -> Al Dashboard con estadísticas (necesitas pasar las variables)
-        $company_id = $user->company_id;
-        $todaySales = Sale::where('company_id', $company_id)
-            ->whereDate('created_at', now())
-            ->where('status', 'completed')
-            ->sum('total');
+        if ($user->hasRole('admin')) {
+            $company_id = $user->company_id;
+            $todaySales = Sale::where('company_id', $company_id)
+                ->whereDate('created_at', now())
+                ->where('status', 'completed')
+                ->sum('total');
 
-        $completedOrders = Sale::where('company_id', $company_id)
-            ->whereDate('created_at', now())
-            ->where('status', 'completed')
-            ->count();
+            $completedOrders = Sale::where('company_id', $company_id)
+                ->whereDate('created_at', now())
+                ->where('status', 'completed')
+                ->count();
 
-        $lowStockProducts = Product::where('company_id', $company_id)
-            ->whereColumn('current_stock', '<=', 'minimum_stock_level')
-            ->get();
+            $lowStockProducts = Product::where('company_id', $company_id)
+                ->whereColumn('current_stock', '<=', 'minimum_stock_level')
+                ->get();
 
-        return view('dashboard', compact('todaySales', 'completedOrders', 'lowStockProducts'));
+            return view('dashboard', compact('todaySales', 'completedOrders', 'lowStockProducts'));
+        }
     })->name('dashboard');
 
     /*

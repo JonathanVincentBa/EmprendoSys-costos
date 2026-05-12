@@ -12,31 +12,23 @@ class UserSeeder extends Seeder
     {
         if (!$companyId) return;
 
-        // 1. Crear ADMIN de la empresa
-        $admin = User::updateOrCreate(
-            ['email' => "admin.empresa{$companyId}@test.com"],
-            [
-                'name' => "Admin Empresa {$companyId}",
-                'password' => Hash::make('password'),
-                'company_id' => $companyId,
-                'email_verified_at' => now(),
-            ]
-        );
+        // 1 Administrador
+        $admin = \App\Models\User::create([
+            'name' => "Admin Empresa $companyId",
+            'email' => "admin$companyId@test.com",
+            'password' => bcrypt('password'),
+            'company_id' => $companyId,
+        ]);
         $admin->assignRole('admin');
 
-        // 2. Crear 3 VENDEDORES por cada empresa
-        for ($i = 1; $i <= 3; $i++) {
-            $vendedor = User::updateOrCreate(
-                ['email' => "vendedor{$i}.empresa{$companyId}@test.com"],
-                [
-                    'name' => "Vendedor {$i} - Empresa {$companyId}",
-                    'password' => Hash::make('password'),
-                    'company_id' => $companyId,
-                    'email_verified_at' => now(),
-                ]
-            );
-            
-            // Importante: Verifica que el rol se llame exactamente 'vendedor'
+        // 2 Vendedores
+        for ($i = 1; $i <= 2; $i++) {
+            $vendedor = \App\Models\User::create([
+                'name' => "Vendedor $i - E$companyId",
+                'email' => "vendedor{$i}_e{$companyId}@test.com",
+                'password' => bcrypt('password'),
+                'company_id' => $companyId,
+            ]);
             $vendedor->assignRole('vendedor');
         }
     }

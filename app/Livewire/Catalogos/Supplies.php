@@ -14,35 +14,28 @@ class Supplies extends Component
     public $search = '';
     public $isOpen = false;
 
-    // Propiedades del modelo según tu migración
+    // Propiedades del formulario
     public $supplyId, $code, $name, $unit_cost;
 
     public function render()
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
-        // 1. Iniciamos la consulta (Query Builder)
         $query = Supply::query();
 
-        // 2. Filtro de Empresa (Tenant)
-        if (!$user->hasRole('super-admin')) {
-            $query->where('company_id', $user->company_id);
+        // Filtro de Empresa (Capa de seguridad adicional)
+        if (!Auth::user()->hasRole('super-admin')) {
+            $query->where('company_id', Auth::user()->company_id);
         }
 
-        // 3. Filtro de Búsqueda
+        // Filtro de Búsqueda
         if (!empty($this->search)) {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('code', 'like', '%' . $this->search . '%');
+                  ->orWhere('code', 'like', '%' . $this->search . '%');
             });
         }
 
-        // 4. Orden y Paginación
-        $supplies = $query->latest()->paginate(10);
-
         return view('livewire.catalogos.supplies', [
-            'supplies' => $supplies
+            'supplies' => $query->latest()->paginate(10)
         ]);
     }
 
@@ -58,29 +51,28 @@ class Supplies extends Component
         $this->code = '';
         $this->name = '';
         $this->unit_cost = '';
+        $this->resetErrorBag();
     }
 
     public function store()
     {
         $this->validate([
-            'code' => 'required|unique:supplies,code,' . $this->supplyId,
-            'name' => 'required|min:3',
+            'code' => 'required|max:50|unique:supplies,code,' . ($this->supplyId ?? 'NULL'),
+            'name' => 'required|min:3|max:255',
             'unit_cost' => 'required|numeric|min:0',
         ]);
 
-        $isUpdate = !is_null($this->supplyId);
-
         Supply::updateOrCreate(['id' => $this->supplyId], [
-            'company_id' => Auth::user()->company_id, //
-            'code' => $this->code,
+            'company_id' => Auth::user()->company_id,
+            'code' => strtoupper($this->code),
             'name' => $this->name,
             'unit_cost' => $this->unit_cost,
         ]);
 
         $this->isOpen = false;
-
+        
         $this->dispatch('swal', [
-            'message' => $this->supplyId ? 'Registro actualizado' : 'Registro creado con éxito',
+            'message' => $this->supplyId ? 'Suministro actualizado correctamente' : 'Suministro creado con éxito',
             'type' => 'success'
         ]);
 
@@ -99,11 +91,7 @@ class Supplies extends Component
 
     public function delete($id)
     {
-        Supply::find($id)->delete();
-
-        $this->dispatch('swal', [
-            'message' => 'El suministro ha sido eliminado',
-            'type' => 'warning' // Color naranja para indicar borrado
-        ]);
+        Supply::findOrFail($id)->delete();
+        $this->dispatch('swal', ['message' => 'Suministro eliminado', 'type' => 'warning']);
     }
 }

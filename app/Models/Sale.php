@@ -9,7 +9,7 @@ class Sale extends Model
 {
     use BelongsToCompany;
 
-    protected $fillable = ['company_id', 'customer_id', 'sale_date', 'total', 'status'];
+    protected $fillable = ['company_id', 'customer_id', 'user_id', 'sale_date', 'total', 'status'];
 
     public function company()
     {

@@ -55,7 +55,7 @@
                 @endcan
 
                 {{-- BLOQUE: PRODUCCIÓN (Materias Primas y Costos) --}}
-                @can('ver catalogos')
+                @if(auth()->user()->hasAnyRole(['super-admin', 'admin']))
                     <flux:sidebar.group :heading="__('Producción y Costos')" class="grid">
                         <flux:sidebar.item icon="beaker" :href="route('raw-materials.index')" wire:navigate>Materias Primas
                         </flux:sidebar.item>
@@ -71,19 +71,20 @@
                         <flux:sidebar.item icon="presentation-chart-line" :href="route('overhead-config.index')"
                             wire:navigate>Gastos Indirectos</flux:sidebar.item>
                     </flux:sidebar.group>
-                @endcan
+                @endif
 
                 {{-- BLOQUE: COMERCIAL (Ventas y Clientes) --}}
-                @can('ver ventas')
+                @if (auth()->user()->hasAnyRole(['super-admin', 'admin', 'vendedor']))
                     <flux:sidebar.group :heading="__('Comercial')" class="grid">
                         <flux:sidebar.item icon="shopping-cart" :href="route('sales.pos')" wire:navigate>Punto de Venta
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="user-group" :href="route('clients.index')" wire:navigate>Clientes
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="document-text" :href="route('invoices.index')" wire:navigate>Facturación
+                        <flux:sidebar.item icon="document-text" :href="route('invoices.index')" wire:navigate>
+                            Facturación
                         </flux:sidebar.item>
                     </flux:sidebar.group>
-                @endcan
+                @endif
             </flux:sidebar.nav>
 
             <flux:spacer />
