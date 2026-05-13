@@ -30,6 +30,12 @@ class AppServiceProvider extends ServiceProvider
         // Cambia el operador a '===' para producción
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
+
+            // Trust Railway's proxy headers
+            \Illuminate\Http\Request::setTrustedProxies(
+                ['*'],
+                \Illuminate\Http\Request::HEADER_X_FORWARDED_ALL
+            );
         }
 
         $this->configureDefaults();
