@@ -47,11 +47,12 @@
             </div>
         </form>
 
-        @if (Route::has('register'))
-            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
-                <span>¿No tienes una cuenta?</span>
-                <flux:link :href="route('register')" wire:navigate>Regístrate aquí</flux:link>
-            </div>
-        @endif
+        <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
+            ¿Necesitas una cuenta?
+            <a href="https://wa.me/593991191755?text=Hola%2C%20quiero%20solicitar%20acceso%20a%20EmprendoSys"
+                target="_blank" rel="noopener noreferrer" class="font-medium text-emerald-600 hover:underline">
+                Solicita acceso por WhatsApp
+            </a>
+        </div>
     </div>
 </x-layouts.auth>

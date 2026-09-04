@@ -28,9 +28,11 @@
                             <a href="{{ route('dashboard') }}" class="rounded-lg px-4 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-200 transition">Dashboard</a>
                         @else
                             <a href="{{ route('login') }}" class="rounded-lg px-4 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-200 transition">Entrar</a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-bold text-zinc-100 shadow-sm hover:bg-zinc-700 transition">Registrarse</a>
-                            @endif
+                            <a href="https://wa.me/593991191755?text=Hola%2C%20quiero%20solicitar%20acceso%20a%20EmprendoSys"
+                                target="_blank" rel="noopener noreferrer"
+                                class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+                                Solicitar acceso
+                            </a>
                         @endauth
                     </nav>
                 @endif
@@ -52,11 +54,11 @@
                         Diseñado para emprendedores que pasan horas frente a la pantalla. Una paleta opaca para mantener la mente clara y la vista descansada.
                     </p>
                     <div class="mt-10 flex items-center justify-center gap-x-6">
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="rounded-xl bg-orange-700 px-8 py-4 text-sm font-bold text-zinc-100 shadow-md hover:bg-orange-800 transition-all">
-                                Comenzar ahora
-                            </a>
-                        @endif
+                        <a href="https://wa.me/593991191755?text=Hola%2C%20quiero%20solicitar%20acceso%20a%20EmprendoSys"
+                            target="_blank" rel="noopener noreferrer"
+                            class="rounded-xl bg-emerald-600 px-8 py-4 text-sm font-bold text-white shadow-md hover:bg-emerald-700 transition-all">
+                            Solicitar acceso por WhatsApp
+                        </a>
                         <a href="#features" class="text-sm font-bold text-zinc-400 hover:text-zinc-600 transition">Explorar funciones ↓</a>
                     </div>
                 </div>
@@ -107,11 +109,11 @@
                     <h2 class="text-2xl font-bold text-zinc-100">Únete a la nueva era de emprendedores</h2>
                     <p class="mt-4 text-zinc-400">Prueba gratuita de 60 días. Sin compromisos, solo resultados.</p>
                     <div class="mt-8">
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="inline-block rounded-lg bg-orange-700 px-8 py-3 text-sm font-bold text-zinc-100 hover:bg-orange-600 transition">
-                                Crear mi cuenta gratuita
-                            </a>
-                        @endif
+                        <a href="https://wa.me/593991191755?text=Hola%2C%20quiero%20solicitar%20acceso%20a%20EmprendoSys"
+                            target="_blank" rel="noopener noreferrer"
+                            class="inline-block rounded-lg bg-emerald-600 px-8 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+                            Solicitar acceso por WhatsApp
+                        </a>
                     </div>
                 </div>
             </div>

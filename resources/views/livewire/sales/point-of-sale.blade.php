@@ -98,8 +98,8 @@
 
             {{-- Tarjeta 2: Selección y Adición de Productos --}}
             <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-5 shadow-sm">
-                <div class="flex items-end gap-3 w-full">
-                    <div class="flex-1 relative">
+                <div class="flex flex-col items-stretch gap-3 w-full sm:flex-row sm:items-end">
+                    <div class="relative min-w-0 flex-1">
                         <label class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider block mb-1.5">Buscar Producto</label>
                         <div class="relative">
                             <input wire:model.live="productSearch" type="text" placeholder="Escriba para buscar por nombre o código..." 
@@ -120,14 +120,14 @@
                         @endif
                     </div>
 
-                    <div class="w-28">
+                    <div class="w-full sm:w-28">
                         <label class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider block mb-1.5 text-center">Cantidad</label>
                         <input type="number" wire:model="quantity" wire:keydown.enter="addItem" min="1" 
                                class="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 py-2.5 text-center font-bold text-sm dark:text-white focus:ring-2 focus:ring-indigo-500">
                     </div>
 
-                    <div>
-                        <button wire:click="addItem" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 text-xs uppercase tracking-wider flex items-center gap-2 transition-all active:scale-95">
+                    <div class="w-full sm:w-auto">
+                        <button wire:click="addItem" class="w-full sm:w-auto px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             Agregar
                         </button>
@@ -246,14 +246,14 @@
             </div>
 
             <div class="grid grid-cols-1 gap-4">
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <flux:select label="Tipo de documento" wire:model="newCustomerIdentificationType">
                         <flux:select.option value="05">Cédula</flux:select.option>
                         <flux:select.option value="04">RUC</flux:select.option>
                         <flux:select.option value="06">Pasaporte</flux:select.option>
                         <flux:select.option value="07">Consumidor final</flux:select.option>
                     </flux:select>
-                    <div class="col-span-2">
+                    <div class="sm:col-span-2">
                         <flux:input label="Identificación" wire:model="newCustomerIdentification" />
                     </div>
                 </div>
