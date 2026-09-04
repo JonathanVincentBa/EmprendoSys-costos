@@ -55,6 +55,8 @@ class Company extends Component
 
     public function createCompany()
     {
+        abort_unless($this->isSuperAdmin(), 403);
+
         $this->reset([
             'company_id',
             'name',
@@ -84,7 +86,11 @@ class Company extends Component
     public function editCompany($id)
     {
         $this->reset(['logo', 'signature_file', 'signature_password']);
-        $company = CompanyModel::find($id);
+        /** @var User $user */
+        $user = Auth::user();
+        $company = $user->hasRole('super-admin')
+            ? CompanyModel::find($id)
+            : CompanyModel::whereKey($user->company_id)->find($id);
 
         if ($company) {
             $this->company_id             = $company->id;
@@ -114,6 +120,8 @@ class Company extends Component
 
     public function toggleStatus($id)
     {
+        abort_unless($this->isSuperAdmin(), 403);
+
         $company = CompanyModel::find($id);
         if ($company) {
             $company->status = ($company->status === 'active') ? 'suspended' : 'active';
@@ -128,6 +136,8 @@ class Company extends Component
 
     public function deleteCompany($id)
     {
+        abort_unless($this->isSuperAdmin(), 403);
+
         $company = CompanyModel::find($id);
         if ($company) {
             if ($company->logo) Storage::disk('public')->delete($company->logo);
@@ -145,6 +155,11 @@ class Company extends Component
     {
         /** @var User $user */
         $user = Auth::user();
+
+        if ($user->hasRole('admin')) {
+            abort_unless($this->company_id && (int) $this->company_id === (int) $user->company_id, 403);
+            $this->company_id = $user->company_id;
+        }
 
         $rules = [
             'name'                  => 'required|min:3',
@@ -247,5 +262,13 @@ class Company extends Component
                 ? CompanyModel::paginate(10)
                 : collect([])
         ]);
+    }
+
+    private function isSuperAdmin(): bool
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return $user->hasRole('super-admin');
     }
 }

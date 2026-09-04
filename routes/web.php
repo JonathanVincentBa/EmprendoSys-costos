@@ -114,8 +114,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::middleware(['role:super-admin|admin'])->group(function () {
         Route::get('users', Users::class)->name('users.index');
-        Route::get('admin/companies', Company::class)->name('admin.companies');
+    });
+
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('company-profile', Company::class)->name('admin.company.profile');
+    });
+
+    Route::middleware(['role:super-admin'])->group(function () {
+        Route::get('admin/companies', Company::class)->name('admin.companies');
     });
 
 
@@ -126,7 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | Módulos técnicos para configurar materias primas, empaques y costos
     | de producción. El vendedor NO tiene acceso aquí.
     */
-    Route::middleware(['role:super-admin|admin'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         // Producción y Recetas
         Route::get('/asistente-maestro', ProductWizard::class)->name('product.wizard');
         Route::get('/productos', Products::class)->name('products.index');
@@ -149,7 +155,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |----------------------------------------------------------------------
     | Módulos a los que el Vendedor tiene permiso para operar.
     */
-    Route::middleware(['role:super-admin|admin|vendedor'])->group(function () {
+    Route::middleware(['role:admin|vendedor'])->group(function () {
         Route::get('/ventas', PointOfSale::class)->name('sales.pos');
         Route::get('/clientes', Customers::class)->name('clients.index');
         Route::get('/facturacion', InvoiceIndex::class)->name('invoices.index'); // Ruta actualizada
@@ -161,17 +167,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 | RUTAS DE MANTENIMIENTO (Solo Super-Admin)
 |--------------------------------------------------------------------------
 */
-Route::get('/reset-db-12345', function () {
-    /** @var User $user */
-    $user = Auth::user();
-    if ($user?->hasRole('super-admin')) {
-        Artisan::call('migrate:fresh --seed');
-        return "Base de datos reseteada y sembrada con éxito.";
-    }
-    abort(403);
-});
-
-Route::get('/limpiar-todo-sistema', function () {
+Route::middleware(['auth', 'verified', 'role:super-admin'])->get('/limpiar-todo-sistema', function () {
     Artisan::call('view:clear');
     Artisan::call('cache:clear');
     Artisan::call('config:clear');

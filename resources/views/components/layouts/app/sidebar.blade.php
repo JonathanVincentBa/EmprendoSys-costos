@@ -38,11 +38,13 @@
                 {{-- BLOQUE: ADMINISTRACIÓN (Control de Acceso) --}}
                 @can('ver administracion')
                     <flux:sidebar.group :heading="__('Administración')" class="grid">
-                        @can('ver empresas')
-                            <flux:sidebar.item icon="building-office" :href="route('admin.companies')" wire:navigate>
+                        @if(auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('admin'))
+                            <flux:sidebar.item icon="building-office"
+                                :href="route(auth()->user()->hasRole('super-admin') ? 'admin.companies' : 'admin.company.profile')"
+                                wire:navigate>
                                 {{ auth()->user()->hasRole('super-admin') ? 'Empresas' : 'Mi Empresa' }}
                             </flux:sidebar.item>
-                        @endcan
+                        @endif
                         @can('ver usuarios')
                             <flux:sidebar.item icon="users" :href="route('users.index')" wire:navigate>Usuarios
                             </flux:sidebar.item>
@@ -55,7 +57,7 @@
                 @endcan
 
                 {{-- BLOQUE: PRODUCCIÓN (Materias Primas y Costos) --}}
-                @if(auth()->user()->hasAnyRole(['super-admin', 'admin']))
+                @if(auth()->user()->hasRole('admin'))
                     <flux:sidebar.group :heading="__('Producción y Costos')" class="grid">
                         <flux:sidebar.item icon="beaker" :href="route('raw-materials.index')" wire:navigate>Materias Primas
                         </flux:sidebar.item>
@@ -74,7 +76,7 @@
                 @endif
 
                 {{-- BLOQUE: COMERCIAL (Ventas y Clientes) --}}
-                @if (auth()->user()->hasAnyRole(['super-admin', 'admin', 'vendedor']))
+                @if (auth()->user()->hasAnyRole(['admin', 'vendedor']))
                     <flux:sidebar.group :heading="__('Comercial')" class="grid">
                         <flux:sidebar.item icon="shopping-cart" :href="route('sales.pos')" wire:navigate>Punto de Venta
                         </flux:sidebar.item>

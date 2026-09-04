@@ -75,6 +75,9 @@ class RecipeManager extends Component
             'quantity_kg' => 'required|numeric|min:0.0001'
         ]);
 
+        $material = RawMaterial::whereKey($this->selected_material_id)->firstOrFail();
+        abort_unless($material->company_id === Auth::user()->company_id, 403);
+
         RecipeItem::create([
             'company_id' => Auth::user()->company_id,
             'recipe_id' => $this->recipe->id,
@@ -95,6 +98,9 @@ class RecipeManager extends Component
     public function addProcess()
     {
         if ($this->selected_process_id) {
+            $process = ProductionProcess::whereKey($this->selected_process_id)->firstOrFail();
+            abort_unless($process->company_id === Auth::user()->company_id, 403);
+
             $this->recipe->processes()->attach($this->selected_process_id, [
                 'company_id' => Auth::user()->company_id
             ]);
@@ -109,7 +115,11 @@ class RecipeManager extends Component
             'units_per_batch' => 'required|numeric|min:1'
         ]);
 
+        $packaging = PackagingMaterial::whereKey($this->selected_packaging_id)->firstOrFail();
+        abort_unless($packaging->company_id === Auth::user()->company_id, 403);
+
         $this->recipe->packagingMaterials()->attach($this->selected_packaging_id, [
+            'company_id' => Auth::user()->company_id,
             'units_per_batch' => $this->units_per_batch
         ]);
 

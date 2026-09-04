@@ -38,6 +38,8 @@ class Users extends Component
 
     public function edit(User $user)
     {
+        $this->ensureCanManage($user);
+
         $this->resetForm();
         $this->userId = $user->id;
         $this->name = $user->name;
@@ -52,19 +54,34 @@ class Users extends Component
     public function save()
     {
         $currentUser = Auth::user();
+        /** @var User $currentUser */
+
+        if ($this->userId) {
+            $this->ensureCanManage(User::findOrFail($this->userId));
+        }
 
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($this->userId)],
-            'role' => 'required',
+            'role' => $currentUser->hasRole('super-admin')
+                ? ['required', Rule::exists('roles', 'name')]
+                : ['required', Rule::exists('roles', 'name')->where('name', '!=', 'super-admin')],
             'password' => $this->userId ? 'nullable|min:8' : 'required|min:8',
             'company_id' => $currentUser->hasRole('super-admin') ? 'nullable' : 'required',
         ]);
 
         // Lógica Multi-tenant: Si no es SuperAdmin, forzar SU empresa
-        $finalCompanyId = $currentUser->hasRole('super-admin') 
+        $finalCompanyId = $currentUser->hasRole('super-admin')
             ? $this->company_id 
             : $currentUser->company_id;
+
+        if (!$currentUser->hasRole('super-admin') && $this->role === 'super-admin') {
+            abort(403);
+        }
+
+        if (!$currentUser->hasRole('super-admin') && $this->userId && $finalCompanyId !== $currentUser->company_id) {
+            abort(403);
+        }
 
         $user = User::updateOrCreate(['id' => $this->userId], [
             'name' => $this->name,
@@ -83,6 +100,7 @@ class Users extends Component
     public function toggleStatus($id)
     {
         $user = User::findOrFail($id);
+        $this->ensureCanManage($user);
         
         // Evitar que te bloquees a ti mismo
         if ($user->id === Auth::id()) {
@@ -102,6 +120,7 @@ class Users extends Component
     public function render()
     {
         $currentUser = Auth::user();
+        /** @var User $currentUser */
         
         $query = User::query()->with(['company', 'roles']);
 
@@ -119,8 +138,19 @@ class Users extends Component
 
         return view('livewire.administracion.users', [
             'users' => $query->latest()->paginate(10),
-            'companies' => Company::all(),
-            'roles' => Role::where('name', '!=', 'super-admin')->get()
+            'companies' => $currentUser->hasRole('super-admin') ? Company::all() : Company::whereKey($currentUser->company_id)->get(),
+            'roles' => Role::when(!$currentUser->hasRole('super-admin'), fn ($query) => $query->where('name', '!=', 'super-admin'))->get()
         ]);
+    }
+
+    private function ensureCanManage(User $user): void
+    {
+        $currentUser = Auth::user();
+        /** @var User $currentUser */
+
+        abort_unless(
+            $currentUser->hasRole('super-admin') || $user->company_id === $currentUser->company_id,
+            403
+        );
     }
 }

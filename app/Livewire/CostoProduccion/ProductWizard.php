@@ -234,8 +234,6 @@ class ProductWizard extends Component
         // Ahora incluye: Materia Prima + Mano de Obra + Empaque + Suministros
         $costoDirectoLote = $materiaPrima + $manoObra + $costoEmpaque + $totalSuministros;
 
-        $costoDirectoLote = $materiaPrima + $manoObra + $costoEmpaque;
-
         // 4. Cargar configuraciones de la empresa actual
         $configs = OverheadConfig::where('company_id', Auth::user()->company_id)->get();
 
