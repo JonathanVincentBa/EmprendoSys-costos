@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->string('identification', 13)->nullable();
+            $table->string('identification_type', 2)->default('05'); // 04: RUC, 05: Cédula, 06: Pasaporte, 07: Consumidor Final
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
-            $table->enum('type', ['minorista', 'mayorista']);
+            $table->enum('type', ['minorista', 'mayorista'])->default('minorista');
             $table->timestamps();
         });
     }

@@ -13,6 +13,7 @@ class Customer extends Model
         'company_id',
         'name',
         'identification', // Nuevo campo
+        'identification_type',
         'email',
         'phone',
         'address',

@@ -5,11 +5,10 @@ namespace App\Livewire\Administracion;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesManager extends Component
 {
-    public $roles;
-    public $allPermissions;
     public $selectedRoleName = '';
     public $newPermission = '';
     public $roleId = null;
@@ -18,24 +17,18 @@ class RolesManager extends Component
     public $editingPermissionId = null;
     public $editPermissionName = '';
 
-    public function mount()
-    {
-        $this->allPermissions = Permission::all();
-        $this->roles = Role::all();
-    }
-
     public function createPermission()
     {
         $this->validate(['newPermission' => 'required|unique:permissions,name']);
         Permission::create(['name' => $this->newPermission]);
         $this->reset('newPermission');
-        $this->allPermissions = Permission::all();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
     public function deletePermission($id)
     {
         Permission::findById($id)->delete();
-        $this->allPermissions = Permission::all();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
     public function editPermission($id)
@@ -50,7 +43,7 @@ class RolesManager extends Component
         $permission = Permission::findById($this->editingPermissionId);
         $permission->update(['name' => $this->editPermissionName]);
         $this->editingPermissionId = null;
-        $this->allPermissions = Permission::all();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
     public function selectRole($id)
@@ -66,7 +59,9 @@ class RolesManager extends Component
         if ($this->roleId) {
             $role = Role::findById($this->roleId);
             $role->syncPermissions($this->permissions);
-            
+
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
             $this->dispatch('swal', [
                 'type' => 'success',
                 'message' => 'Permisos actualizados con éxito.'
@@ -76,6 +71,9 @@ class RolesManager extends Component
 
     public function render()
     {
-        return view('livewire.administracion.roles-manager');
+        return view('livewire.administracion.roles-manager', [
+            'roles' => Role::all(),
+            'allPermissions' => Permission::all(),
+        ]);
     }
 }

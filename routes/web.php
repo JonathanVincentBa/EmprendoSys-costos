@@ -11,6 +11,7 @@ use App\Livewire\Catalogos\Supplies;
 use App\Livewire\CostoProduccion\Products;
 use App\Livewire\CostoProduccion\RecipeManager;
 use App\Livewire\CostoProduccion\ProductWizard;
+use App\Livewire\ElectronicInvoicing\InvoiceIndex; // Importación agregada
 use App\Livewire\Sales\Customers;
 use App\Livewire\Sales\PointOfSale;
 use App\Models\Customer;
@@ -73,7 +74,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('dashboard-vendedor', compact('stats'));
         }
 
-        // 3. Admin -> Al Dashboard con estadísticas (necesitas pasar las variables)
+        // 3. Admin -> Al Dashboard con estadísticas
         if ($user->hasRole('admin')) {
             $company_id = $user->company_id;
             $todaySales = Sale::where('company_id', $company_id)
@@ -144,16 +145,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
-    | ÁREA COMERCIAL / VENTAS (Super-Admin, Admin y Vendedor)
+    | ÁREA COMERCIAL / VENTAS Y SRI (Super-Admin, Admin y Vendedor)
     |----------------------------------------------------------------------
     | Módulos a los que el Vendedor tiene permiso para operar.
     */
     Route::middleware(['role:super-admin|admin|vendedor'])->group(function () {
         Route::get('/ventas', PointOfSale::class)->name('sales.pos');
         Route::get('/clientes', Customers::class)->name('clients.index');
-        Route::get('/facturacion', function () {
-            return '<h1 class="p-6 text-2xl">Módulo SRI (Próximamente)</h1>';
-        })->name('invoices.index');
+        Route::get('/facturacion', InvoiceIndex::class)->name('invoices.index'); // Ruta actualizada
     });
 });
 

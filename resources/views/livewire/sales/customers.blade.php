@@ -2,20 +2,20 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <flux:heading size="xl">Clientes</flux:heading>
-            <flux:subheading>Gestiona los clientes de la empresa</flux:subheading>
+            <flux:subheading>Gestiona los clientes de la empresa para facturación electrónica</flux:subheading>
         </div>
         <flux:button wire:click="create" variant="primary" icon="plus">Nuevo Cliente</flux:button>
     </div>
 
     <div class="mb-4">
-        <flux:input wire:model.live="search" icon="magnifying-glass" placeholder="Buscar cliente..." class="max-w-md" />
+        <flux:input wire:model.live="search" icon="magnifying-glass" placeholder="Buscar cliente por nombre o identificación..." class="max-w-md" />
     </div>
 
     <div class="overflow-hidden border border-zinc-200 dark:border-zinc-700 rounded-lg">
         <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
             <thead class="bg-zinc-50 dark:bg-zinc-900">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Identificación</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Tipo / Identificación</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Nombre / Razón Social</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Teléfono / Email</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Acciones</th>
@@ -25,6 +25,15 @@
                 @forelse($customers as $customer)
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-zinc-600 dark:text-zinc-400">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 mr-2">
+                                @switch($customer->identification_type)
+                                    @case('04') RUC @break
+                                    @case('05') Cédula @break
+                                    @case('06') Pasaporte @break
+                                    @case('07') Consumidor Final @break
+                                    @default Cédula
+                                @endswitch
+                            </span>
                             {{ $customer->identification }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
@@ -60,16 +69,29 @@
         <form wire:submit="store" class="space-y-6">
             <div>
                 <flux:heading size="lg">{{ $customer_id ? 'Editar Cliente' : 'Nuevo Cliente' }}</flux:heading>
-                <flux:subheading>Información básica del cliente para facturación.</flux:subheading>
+                <flux:subheading>Información fiscal del cliente para facturación SRI.</flux:subheading>
             </div>
 
             <div class="grid grid-cols-1 gap-4">
-                <flux:input label="Identificación (Cédula/RUC)" wire:model="identification" />
-                <flux:input label="Nombre Completo" wire:model="name" />
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <flux:select label="Tipo Doc." wire:model="identification_type">
+                            <flux:select.option value="05">Cédula (05)</flux:select.option>
+                            <flux:select.option value="04">RUC (04)</flux:select.option>
+                            <flux:select.option value="06">Pasaporte (06)</flux:select.option>
+                            <flux:select.option value="07">Consumidor Final (07)</flux:select.option>
+                        </flux:select>
+                    </div>
+                    <div class="col-span-2">
+                        <flux:input label="Identificación" wire:model="identification" />
+                    </div>
+                </div>
+
+                <flux:input label="Nombre Completo / Razón Social" wire:model="name" />
                 
                 <div class="grid grid-cols-2 gap-4">
                     <flux:input label="Teléfono" wire:model="phone" />
-                    <flux:input label="Email" type="email" wire:model="email" />
+                    <flux:input label="Email (Envío de RIDE/XML)" type="email" wire:model="email" />
                 </div>
 
                 <flux:textarea label="Dirección" wire:model="address" rows="2" />

@@ -12,25 +12,26 @@ class Customers extends Component
 {
     use WithPagination, AuthorizesRequests;
 
-    // Propiedades de búsqueda e interfaz
     public $search = '';
     public $isModalOpen = false;
 
-    // Propiedades del formulario (Inicializadas para evitar errores de tipado)
+    // Propiedades del formulario
     public $customer_id = null;
     public $name = '';
+    public $identification_type = '05'; // Valor por defecto: Cédula
     public $identification = '';
     public $email = '';
     public $phone = '';
     public $address = '';
+    public $type = 'minorista'; // Valor por defecto para el ENUM
 
     protected $rules = [
         'name' => 'required|min:3',
+        'identification_type' => 'required',
         'identification' => 'required',
         'email' => 'nullable|email',
     ];
 
-    // Resetear página al buscar para evitar que la tabla quede vacía en páginas altas
     public function updatingSearch()
     {
         $this->resetPage();
@@ -38,8 +39,7 @@ class Customers extends Component
 
     public function create()
     {
-        // Verificar permiso antes de abrir el modal
-        $this->authorize('crear catalogos'); 
+        $this->authorize('gestionar clientes');
         
         $this->resetFields();
         $this->isModalOpen = true;
@@ -47,35 +47,37 @@ class Customers extends Component
 
     public function edit($id)
     {
-        // Verificar permiso
-        $this->authorize('editar catalogos');
+        $this->authorize('gestionar clientes');
 
         $customer = Customer::findOrFail($id);
         
         $this->customer_id = $id;
         $this->name = $customer->name;
+        $this->identification_type = $customer->identification_type ?? '05';
         $this->identification = $customer->identification;
         $this->email = $customer->email;
         $this->phone = $customer->phone;
         $this->address = $customer->address;
+        $this->type = $customer->type ?? 'minorista';
         
         $this->isModalOpen = true;
     }
 
     public function store()
     {
-        // Seguridad: El vendedor no puede guardar si no tiene el permiso
-        $this->authorize($this->customer_id ? 'editar catalogos' : 'crear catalogos');
+        $this->authorize('gestionar clientes');
 
         $this->validate();
 
         Customer::updateOrCreate(['id' => $this->customer_id], [
             'company_id' => Auth::user()->company_id,
             'name' => $this->name,
+            'identification_type' => $this->identification_type,
             'identification' => $this->identification,
             'email' => $this->email,
             'phone' => $this->phone,
             'address' => $this->address,
+            'type' => $this->type,
         ]);
 
         $this->dispatch('swal', [
@@ -88,8 +90,7 @@ class Customers extends Component
 
     public function delete($id)
     {
-        // Seguridad: El vendedor no puede borrar
-        $this->authorize('eliminar catalogos');
+        $this->authorize('gestionar clientes');
 
         Customer::findOrFail($id)->delete();
 
@@ -107,7 +108,9 @@ class Customers extends Component
 
     private function resetFields()
     {
-        $this->reset(['name', 'identification', 'email', 'phone', 'address', 'customer_id']);
+        $this->reset(['name', 'identification_type', 'identification', 'email', 'phone', 'address', 'customer_id', 'type']);
+        $this->identification_type = '05';
+        $this->type = 'minorista';
     }
 
     public function render()
@@ -115,15 +118,12 @@ class Customers extends Component
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // 1. Iniciamos el Query Builder
         $query = Customer::query();
 
-        // 2. Filtro Multi-tenant (Seguridad de datos por empresa)
         if ($user && !$user->hasRole('super-admin')) {
             $query->where('company_id', $user->company_id);
         }
 
-        // 3. Filtro de búsqueda
         if (!empty($this->search)) {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
@@ -131,7 +131,6 @@ class Customers extends Component
             });
         }
 
-        // 4. Retornamos la vista con la variable 'customers' paginada
         return view('livewire.sales.customers', [
             'customers' => $query->latest()->paginate(10)
         ]);

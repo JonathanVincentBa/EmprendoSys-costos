@@ -14,11 +14,22 @@ class Company extends Model
 {
     protected $fillable = [
         'name',
+        'razon_social',
         'ruc',
         'address',
+        'establishment_address',
         'phone',
         'email',
-        'logo'
+        'status',
+        'logo',
+        'estab',
+        'pto_emi',
+        'contribuyente_especial',
+        'obligado_contabilidad',
+        'contribuyente_rimpe',
+        'signature_path',
+        'signature_password',
+        'sri_environment',
     ];
 
     public function getLogoUrlAttribute()
@@ -60,5 +71,23 @@ class Company extends Model
     public function overheadConfigs()
     {
         return $this->hasMany(OverheadConfig::class);
+    }
+    public function setSignaturePasswordAttribute($value)
+    {
+        if (!empty($value)) {
+            $this->attributes['signature_password'] = encrypt($value);
+        }
+    }
+
+    public function getSignaturePasswordAttribute($value)
+    {
+        if (!empty($value)) {
+            try {
+                return decrypt($value);
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+        return null;
     }
 }

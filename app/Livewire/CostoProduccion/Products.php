@@ -12,15 +12,18 @@ class Products extends Component
     use WithPagination;
 
     public $isOpen = false;
+    public $isStockModalOpen = false;
     public $search = '';
 
-    // PROPIEDADES DEL FORMULARIO
-    // IMPORTANTE: Quitamos "int", "string", etc. y asignamos valores por defecto
+    // PROPIEDADES DEL FORMULARIO DE PRODUCTO
     public $productId = null;
     public $name = '';
     public $presentation_ml = 0;
     public $packaging_type = 'frasco';
     public $is_active = true;
+
+    // PROPIEDAD PARA INGRESO DE STOCK
+    public $stockToAdd = 0;
 
     protected $rules = [
         'name' => 'required|min:3',
@@ -29,7 +32,6 @@ class Products extends Component
         'is_active' => 'boolean',
     ];
 
-    // Forzamos que al cargar el componente todo esté inicializado
     public function mount()
     {
         $this->resetInputFields();
@@ -61,6 +63,7 @@ class Products extends Component
         $this->presentation_ml = 0;
         $this->packaging_type = 'frasco';
         $this->is_active = true;
+        $this->stockToAdd = 0;
     }
 
     public function create()
@@ -102,6 +105,36 @@ class Products extends Component
         $this->isOpen = false;
         $this->dispatch('swal', [
             'message' => $this->productId ? 'Producto actualizado' : 'Producto creado',
+            'type' => 'success'
+        ]);
+    }
+
+    // ABRIR MODAL DE REGISTRO DE STOCK
+    public function openStockModal($id)
+    {
+        $this->resetValidation();
+        $product = Product::findOrFail($id);
+        $this->productId = $product->id;
+        $this->name = $product->name;
+        $this->stockToAdd = 0;
+        $this->isStockModalOpen = true;
+    }
+
+    // INCREMENTAR EL STOCK EN LA BASE DE DATOS
+    public function addStock()
+    {
+        $this->validate([
+            'stockToAdd' => 'required|integer|min:1'
+        ]);
+
+        $product = Product::findOrFail($this->productId);
+        $product->increment('current_stock', $this->stockToAdd);
+
+        $this->isStockModalOpen = false;
+        $this->resetInputFields();
+
+        $this->dispatch('swal', [
+            'message' => 'Stock actualizado correctamente',
             'type' => 'success'
         ]);
     }

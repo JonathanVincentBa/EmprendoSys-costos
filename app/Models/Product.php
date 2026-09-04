@@ -8,8 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use BelongsToCompany;
-    
-    protected $fillable = ['company_id', 'name', 'presentation_ml', 'packaging_type', 'is_active'];
+
+    protected $fillable = [
+        'company_id',
+        'name',
+        'presentation_ml',
+        'packaging_type',
+        'unit_cost',
+        'price',
+        'current_stock',
+        'is_active',
+    ];
 
     public function company()
     {
@@ -23,7 +32,7 @@ class Product extends Model
     /**
      * Filtra productos cuyo stock actual sea menor o igual al mínimo.
      */
-    
+
     public function scopeLowStock($query)
     {
         return $query->whereColumn('current_stock', '<=', 'minimum_stock_level');

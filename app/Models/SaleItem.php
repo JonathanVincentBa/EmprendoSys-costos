@@ -9,7 +9,18 @@ class SaleItem extends Model
 {
     use BelongsToCompany;   
     
-    protected $fillable = ['company_id', 'sale_id', 'product_id', 'quantity', 'unit_price'];
+    protected $fillable = [
+        'company_id',
+        'sale_id',
+        'product_id',
+        'quantity',
+        'unit_price',
+        'total_price',
+        'discount',
+        'vat_code',
+        'vat_rate',
+        'vat_amount',
+    ];
     
     public function company() { return $this->belongsTo(Company::class); }
     public function product() { return $this->belongsTo(Product::class); }

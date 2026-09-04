@@ -14,16 +14,31 @@ class Company extends Component
 {
     use WithFileUploads, WithPagination;
 
-    // Propiedades para el formulario
+    // Propiedades generales y legales
     public $company_id;
     public $name;
+    public $razon_social;
     public $ruc;
     public $address;
+    public $establishment_address;
     public $phone;
     public $email;
     public $logo;
     public $current_logo;
-    public $status = 'active'; // Nuevo: Para manejar el estado
+    public $status = 'active';
+
+    // Configuración Tributaria SRI
+    public $estab = '001';
+    public $pto_emi = '001';
+    public $contribuyente_especial;
+    public $obligado_contabilidad = 'NO';
+    public $contribuyente_rimpe;
+    public $sri_environment = '1';
+
+    // Propiedades para Firma Digital
+    public $signature_file;
+    public $signature_password = '';
+    public $has_signature = false;
 
     // Estado de la vista
     public $isEditing = false;
@@ -38,37 +53,65 @@ class Company extends Component
         }
     }
 
-    /**
-     * Prepara el formulario para crear una nueva empresa
-     */
     public function createCompany()
     {
-        $this->reset(['name', 'ruc', 'address', 'phone', 'email', 'logo', 'current_logo', 'company_id']);
+        $this->reset([
+            'company_id',
+            'name',
+            'razon_social',
+            'ruc',
+            'address',
+            'establishment_address',
+            'phone',
+            'email',
+            'logo',
+            'current_logo',
+            'contribuyente_especial',
+            'contribuyente_rimpe',
+            'signature_file',
+            'signature_password'
+        ]);
+
         $this->status = 'active';
+        $this->estab = '001';
+        $this->pto_emi = '001';
+        $this->obligado_contabilidad = 'NO';
+        $this->sri_environment = '1';
+        $this->has_signature = false;
         $this->isEditing = true;
     }
 
     public function editCompany($id)
     {
-        $this->reset(['logo']);
+        $this->reset(['logo', 'signature_file', 'signature_password']);
         $company = CompanyModel::find($id);
 
         if ($company) {
-            $this->company_id   = $company->id;
-            $this->name         = $company->name;
-            $this->ruc          = $company->ruc;
-            $this->address      = $company->address;
-            $this->phone        = $company->phone;
-            $this->email        = $company->email;
-            $this->current_logo = $company->logo;
-            $this->status       = $company->status ?? 'active';
-            $this->isEditing    = true;
+            $this->company_id             = $company->id;
+            $this->name                   = $company->name;
+            $this->razon_social           = $company->razon_social;
+            $this->ruc                    = $company->ruc;
+            $this->address                = $company->address;
+            $this->establishment_address  = $company->establishment_address;
+            $this->phone                  = $company->phone;
+            $this->email                  = $company->email;
+            $this->current_logo           = $company->logo;
+            $this->status                 = $company->status ?? 'active';
+
+            // Campos SRI
+            $this->estab                  = $company->estab ?? '001';
+            $this->pto_emi                = $company->pto_emi ?? '001';
+            $this->contribuyente_especial = $company->contribuyente_especial;
+            $this->obligado_contabilidad  = $company->obligado_contabilidad ?? 'NO';
+            $this->contribuyente_rimpe    = $company->contribuyente_rimpe;
+            $this->sri_environment        = $company->sri_environment ?? '1';
+
+            // Firma
+            $this->has_signature          = !empty($company->signature_path);
+            $this->isEditing              = true;
         }
     }
 
-    /**
-     * Alterna el estado de la empresa (Activo/Suspendido)
-     */
     public function toggleStatus($id)
     {
         $company = CompanyModel::find($id);
@@ -83,15 +126,12 @@ class Company extends Component
         }
     }
 
-    /**
-     * Elimina una empresa
-     */
     public function deleteCompany($id)
     {
         $company = CompanyModel::find($id);
         if ($company) {
-            // Opcional: Eliminar logo del storage
             if ($company->logo) Storage::disk('public')->delete($company->logo);
+            if ($company->signature_path) Storage::disk('local')->delete($company->signature_path);
 
             $company->delete();
             $this->dispatch('swal', [
@@ -106,26 +146,42 @@ class Company extends Component
         /** @var User $user */
         $user = Auth::user();
 
-        $this->validate([
-            'name'  => 'required|min:3',
-            'ruc'   => 'required|digits:13',
-            'email' => 'required|email',
-            'logo'  => 'nullable|image|max:1024',
-        ]);
+        $rules = [
+            'name'                  => 'required|min:3',
+            'razon_social'          => 'required|min:3',
+            'ruc'                   => 'required|digits:13',
+            'email'                 => 'required|email',
+            'estab'                 => 'required|digits:3',
+            'pto_emi'               => 'required|digits:3',
+            'obligado_contabilidad' => 'required|in:SI,NO',
+            'sri_environment'       => 'required|in:1,2',
+            'logo'                  => 'nullable|image|max:1024',
+            'signature_file'        => 'nullable|file|mimes:p12,pfx|max:2048',
+        ];
 
-        // Usamos updateOrCreate para que sirva para Crear y Editar
+        $this->validate($rules);
+
         $company = CompanyModel::updateOrCreate(
             ['id' => $this->company_id],
             [
-                'name'    => $this->name,
-                'ruc'     => $this->ruc,
-                'address' => $this->address,
-                'phone'   => $this->phone,
-                'email'   => $this->email,
-                'status'  => $this->status,
+                'name'                  => $this->name,
+                'razon_social'          => $this->razon_social,
+                'ruc'                   => $this->ruc,
+                'address'               => $this->address,
+                'establishment_address' => $this->establishment_address ?? $this->address,
+                'phone'                 => $this->phone,
+                'email'                 => $this->email,
+                'status'                => $this->status,
+                'estab'                 => $this->estab,
+                'pto_emi'               => $this->pto_emi,
+                'contribuyente_especial' => $this->contribuyente_especial,
+                'obligado_contabilidad' => $this->obligado_contabilidad,
+                'contribuyente_rimpe'   => $this->contribuyente_rimpe,
+                'sri_environment'       => $this->sri_environment,
             ]
         );
 
+        // Subida de Logo
         if ($this->logo) {
             if ($company->logo && Storage::disk('public')->exists($company->logo)) {
                 Storage::disk('public')->delete($company->logo);
@@ -135,6 +191,26 @@ class Company extends Component
             ]);
         }
 
+        // Subida de Archivo .p12 (Privado en storage local)
+        if ($this->signature_file) {
+            if ($company->signature_path && Storage::disk('local')->exists($company->signature_path)) {
+                Storage::disk('local')->delete($company->signature_path);
+            }
+            $path = $this->signature_file->store("signatures/{$company->id}", 'local');
+            $company->signature_path = $path;
+        }
+
+        // Actualizar contraseña solo si se ingresó una nueva
+        if (!empty($this->signature_password)) {
+            $company->signature_password = $this->signature_password;
+        }
+
+        $company->save();
+
+        $this->has_signature = !empty($company->signature_path);
+        $this->signature_password = '';
+        $this->signature_file = null;
+
         $this->dispatch('swal', [
             'message' => $this->company_id ? 'Datos actualizados correctamente' : 'Nueva empresa creada con éxito',
             'type'    => 'success'
@@ -142,7 +218,22 @@ class Company extends Component
 
         if ($user->hasRole('super-admin')) {
             $this->isEditing = false;
-            $this->reset(['name', 'ruc', 'address', 'phone', 'email', 'logo', 'current_logo', 'company_id']);
+            $this->reset([
+                'company_id',
+                'name',
+                'razon_social',
+                'ruc',
+                'address',
+                'establishment_address',
+                'phone',
+                'email',
+                'logo',
+                'current_logo',
+                'contribuyente_especial',
+                'contribuyente_rimpe',
+                'signature_file',
+                'signature_password'
+            ]);
         }
     }
 

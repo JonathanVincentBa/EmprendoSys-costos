@@ -81,7 +81,7 @@
                         <flux:sidebar.item icon="user-group" :href="route('clients.index')" wire:navigate>Clientes
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="route('invoices.index')" wire:navigate>
-                            Facturación
+                            Facturación Electrónica
                         </flux:sidebar.item>
                     </flux:sidebar.group>
                 @endif
@@ -141,13 +141,16 @@
         // Alertas Toast (Éxito, Error, Info)
         window.addEventListener('swal', event => {
             const data = event.detail[0] || event.detail;
+            const isError = data.type === 'error';
             Swal.fire({
-                title: data.message || 'Proceso exitoso',
+                title: isError ? 'Error en el proceso' : (data.message || 'Proceso exitoso'),
+                text: isError ? data.message : undefined,
                 icon: data.type || 'success',
-                timer: 3000,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false
+                timer: isError ? undefined : 3000,
+                toast: !isError,
+                position: isError ? 'center' : 'top-end',
+                showConfirmButton: isError,
+                confirmButtonText: 'Cerrar'
             });
         });
 
