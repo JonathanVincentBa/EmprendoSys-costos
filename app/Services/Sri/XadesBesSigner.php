@@ -40,7 +40,7 @@ class XadesBesSigner
             $issuerX509[] = "$key=$val";
         }
         $issuerName = implode(',', $issuerX509);
-        $serialNumber = $certData['serialNumber'];
+        $serialNumber = self::hexToDecimal((string) $certData['serialNumber']);
 
         // Cargar XML
         $dom = new DOMDocument('1.0', 'UTF-8');
@@ -117,12 +117,94 @@ class XadesBesSigner
             '</ds:Object>' .
             '</ds:Signature>';
 
-        // Insertar el nodo ds:Signature dentro del comprobante XML
+        // Insertar primero la firma para canonicalizar exactamente el XML final.
         $sigDom = new DOMDocument('1.0', 'UTF-8');
         $sigDom->loadXML($signatureNodeXml);
+
         $importedNode = $dom->importNode($sigDom->documentElement, true);
         $dom->documentElement->appendChild($importedNode);
 
+        // El SRI valida los bytes canonicalizados del nodo final, no el texto XML original.
+        $signedPropertiesNode = $dom->getElementsByTagName('SignedProperties')->item(0);
+        $signedInfoNode = $dom->getElementsByTagName('SignedInfo')->item(0);
+        $signatureValueNode = $dom->getElementsByTagName('SignatureValue')->item(0);
+
+        if (!$signedPropertiesNode || !$signedInfoNode || !$signatureValueNode) {
+            throw new Exception('No se pudo construir la estructura de firma XAdES.');
+        }
+
+        $canonicalSignedProperties = $signedPropertiesNode->C14N();
+        $signedPropertiesDigestNode = null;
+        foreach ($signedInfoNode->getElementsByTagName('Reference') as $reference) {
+            if ($reference->getAttribute('Type') === 'http://uri.etsi.org/01903#SignedProperties') {
+                $signedPropertiesDigestNode = $reference->getElementsByTagName('DigestValue')->item(0);
+                break;
+            }
+        }
+
+        if (!$signedPropertiesDigestNode) {
+            throw new Exception('No se encontró la referencia a SignedProperties.');
+        }
+
+        $signedPropertiesDigestNode->nodeValue = base64_encode(sha1($canonicalSignedProperties, true));
+        $canonicalSignedInfo = $signedInfoNode->C14N();
+        if (!openssl_sign($canonicalSignedInfo, $signatureValue, $privateKey, OPENSSL_ALGO_SHA1)) {
+            throw new Exception('No se pudo generar la firma digital.');
+        }
+        $signatureValueNode->nodeValue = base64_encode($signatureValue);
+
         return $dom->saveXML();
+    }
+
+    private static function hexToDecimal(string $hex): string
+    {
+        $hex = strtolower(ltrim($hex, '0x'));
+        $decimal = '0';
+
+        foreach (str_split($hex) as $digit) {
+            $decimal = self::decimalMultiply($decimal, 16);
+            $decimal = self::decimalAdd($decimal, hexdec($digit));
+        }
+
+        return ltrim($decimal, '0') ?: '0';
+    }
+
+    private static function decimalMultiply(string $number, int $factor): string
+    {
+        $carry = 0;
+        $result = '';
+
+        for ($index = strlen($number) - 1; $index >= 0; $index--) {
+            $value = ((int) $number[$index] * $factor) + $carry;
+            $result = ($value % 10) . $result;
+            $carry = intdiv($value, 10);
+        }
+
+        while ($carry > 0) {
+            $result = ($carry % 10) . $result;
+            $carry = intdiv($carry, 10);
+        }
+
+        return $result;
+    }
+
+    private static function decimalAdd(string $number, int $value): string
+    {
+        $index = strlen($number) - 1;
+        $carry = $value;
+
+        while ($index >= 0 && $carry > 0) {
+            $sum = (int) $number[$index] + $carry;
+            $number[$index] = (string) ($sum % 10);
+            $carry = intdiv($sum, 10);
+            $index--;
+        }
+
+        while ($carry > 0) {
+            $number = ($carry % 10) . $number;
+            $carry = intdiv($carry, 10);
+        }
+
+        return $number;
     }
 }

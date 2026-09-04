@@ -59,7 +59,7 @@
                                     <flux:badge color="green">Autorizado</flux:badge>
                                 @elseif($sale->sri_status === 'RECIBIDA')
                                     <flux:badge color="blue">Recibida</flux:badge>
-                                @elseif($sale->sri_status === 'DEVUELTA')
+                                @elseif(in_array($sale->sri_status, ['DEVUELTA', 'NO AUTORIZADO']))
                                     <flux:badge color="red">Devuelta</flux:badge>
                                 @elseif($sale->sri_status === 'ERROR')
                                     <flux:badge color="amber">Error</flux:badge>
@@ -68,7 +68,7 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 text-right">
-                                @if(in_array($sale->sri_status, ['DEVUELTA', 'ERROR', 'PENDING', 'RECIBIDA', null]))
+                                @if(in_array($sale->sri_status, ['DEVUELTA', 'NO AUTORIZADO', 'ERROR', 'PENDING', 'RECIBIDA', 'EN PROCESO', null]))
                                     <flux:button wire:click="reemitirSri({{ $sale->id }})" wire:loading.attr="disabled"
                                         wire:target="reemitirSri({{ $sale->id }})" variant="ghost" size="sm" icon="arrow-path">Reenviar</flux:button>
                                 @endif

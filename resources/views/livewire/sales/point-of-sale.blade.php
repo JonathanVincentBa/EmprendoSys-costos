@@ -1,4 +1,4 @@
-<div class="p-6 max-w-[1600px] mx-auto space-y-6 bg-zinc-50/50 dark:bg-zinc-950 min-h-screen">
+<div class="p-6 max-w-400 mx-auto space-y-6 bg-zinc-50/50 dark:bg-zinc-950 min-h-screen">
     {{-- Header Principal --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-zinc-200 dark:border-zinc-800">
         <div>
@@ -47,7 +47,7 @@
                         <input wire:model.live="customerSearch" type="text" placeholder="Buscar cliente por Nombre, Cédula o RUC..." 
                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 text-sm focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-indigo-500 dark:text-white transition-all">
                         
-                        @if(!empty($customers))
+                        @if($customers->isNotEmpty())
                             <div class="absolute z-50 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl mt-2 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-700/50">
                                 @foreach($customers as $c)
                                     <button wire:click="selectCustomer({{ $c->id }})" class="w-full text-left p-3.5 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 flex justify-between items-center transition-colors">
@@ -63,6 +63,17 @@
                             </div>
                         @endif
                     </div>
+
+                    @if(strlen(trim($customerSearch)) > 1 && $customers->isEmpty())
+                        <div class="mt-3 flex flex-col gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-3 dark:border-indigo-900/50 dark:bg-indigo-950/30 sm:flex-row sm:items-center sm:justify-between">
+                            <p class="text-sm text-indigo-900 dark:text-indigo-200">No encontramos un cliente con esa búsqueda.</p>
+                            <button wire:click="openCustomerModal" type="button"
+                                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-indigo-700">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Crear cliente
+                            </button>
+                        </div>
+                    @endif
                 @else
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-50 dark:bg-zinc-800/40 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800">
                         <div>
@@ -227,5 +238,37 @@
             </div>
         </div>
 
-    </div>
+    <flux:modal wire:model="isCustomerModalOpen" class="md:w-140">
+        <form wire:submit="saveCustomer" class="space-y-6">
+            <div>
+                <flux:heading size="lg">Registrar cliente</flux:heading>
+                <flux:subheading>El cliente quedará seleccionado automáticamente en esta factura.</flux:subheading>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div class="grid grid-cols-3 gap-3">
+                    <flux:select label="Tipo de documento" wire:model="newCustomerIdentificationType">
+                        <flux:select.option value="05">Cédula</flux:select.option>
+                        <flux:select.option value="04">RUC</flux:select.option>
+                        <flux:select.option value="06">Pasaporte</flux:select.option>
+                        <flux:select.option value="07">Consumidor final</flux:select.option>
+                    </flux:select>
+                    <div class="col-span-2">
+                        <flux:input label="Identificación" wire:model="newCustomerIdentification" />
+                    </div>
+                </div>
+                <flux:input label="Nombre / Razón social" wire:model="newCustomerName" />
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <flux:input label="Correo electrónico" type="email" wire:model="newCustomerEmail" />
+                    <flux:input label="Teléfono" wire:model="newCustomerPhone" />
+                </div>
+                <flux:textarea label="Dirección" wire:model="newCustomerAddress" rows="2" />
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <flux:button type="button" wire:click="closeCustomerModal" variant="ghost">Cancelar</flux:button>
+                <flux:button type="submit" variant="primary">Guardar y seleccionar</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 </div>

@@ -18,6 +18,13 @@ class PointOfSale extends Component
 {
     public $customerSearch = '';
     public $selectedCustomer = null;
+    public $isCustomerModalOpen = false;
+    public $newCustomerName = '';
+    public $newCustomerIdentificationType = '05';
+    public $newCustomerIdentification = '';
+    public $newCustomerEmail = '';
+    public $newCustomerPhone = '';
+    public $newCustomerAddress = '';
     public $productSearch = '';
     public $selectedProduct = null;
     public $items = [];
@@ -30,11 +37,70 @@ class PointOfSale extends Component
 
     public function selectCustomer($id)
     {
-        $customer = Customer::find($id);
+        $customer = Customer::where('company_id', Auth::user()->company_id)->find($id);
         if ($customer) {
             $this->selectedCustomer = $customer->toArray();
             $this->customerSearch = '';
         }
+    }
+
+    public function openCustomerModal()
+    {
+        $this->resetCustomerForm();
+        $this->newCustomerName = trim($this->customerSearch);
+        $this->isCustomerModalOpen = true;
+    }
+
+    public function closeCustomerModal()
+    {
+        $this->isCustomerModalOpen = false;
+        $this->resetCustomerForm();
+    }
+
+    public function saveCustomer()
+    {
+        $this->validate([
+            'newCustomerName' => 'required|string|min:3|max:255',
+            'newCustomerIdentificationType' => 'required|in:04,05,06,07',
+            'newCustomerIdentification' => 'required|string|max:13',
+            'newCustomerEmail' => 'nullable|email|max:255',
+            'newCustomerPhone' => 'nullable|string|max:30',
+            'newCustomerAddress' => 'nullable|string|max:500',
+        ]);
+
+        $customer = Customer::create([
+            'company_id' => Auth::user()->company_id,
+            'name' => $this->newCustomerName,
+            'identification_type' => $this->newCustomerIdentificationType,
+            'identification' => $this->newCustomerIdentification,
+            'email' => $this->newCustomerEmail ?: null,
+            'phone' => $this->newCustomerPhone ?: null,
+            'address' => $this->newCustomerAddress ?: null,
+            'type' => 'minorista',
+        ]);
+
+        $this->selectedCustomer = $customer->toArray();
+        $this->customerSearch = '';
+        $this->closeCustomerModal();
+
+        $this->dispatch('swal', [
+            'message' => 'Cliente registrado y seleccionado en la factura.',
+            'type' => 'success',
+        ]);
+    }
+
+    private function resetCustomerForm()
+    {
+        $this->reset([
+            'newCustomerName',
+            'newCustomerIdentificationType',
+            'newCustomerIdentification',
+            'newCustomerEmail',
+            'newCustomerPhone',
+            'newCustomerAddress',
+        ]);
+        $this->newCustomerIdentificationType = '05';
+        $this->resetValidation();
     }
 
     public function selectProduct($id)
@@ -312,7 +378,7 @@ class PointOfSale extends Component
     {
         $userCompanyId = Auth::user()->company_id;
 
-        $customers = [];
+        $customers = collect();
         if (strlen($this->customerSearch) > 1) {
             $customers = Customer::query()
                 ->where('company_id', $userCompanyId)
