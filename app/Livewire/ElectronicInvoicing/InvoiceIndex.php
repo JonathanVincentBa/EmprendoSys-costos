@@ -8,7 +8,9 @@ use App\Models\Sale;
 use App\Services\Sri\SriXmlService;
 use App\Services\Sri\SriSignatureService;
 use App\Services\Sri\SriWebService;
+use App\Mail\AuthorizedInvoiceMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Exception;
 
 class InvoiceIndex extends Component
@@ -71,8 +73,10 @@ class InvoiceIndex extends Component
                         'sri_response'           => 'Comprobante Autorizado con éxito'
                     ]);
 
+                    $emailMessage = $this->sendAuthorizedInvoiceEmail($sale, $xmlSigned);
+
                     $this->dispatch('swal', [
-                        'message' => '¡Factura N° ' . $sale->id . ' AUTORIZADA exitosamente!',
+                        'message' => '¡Factura N° ' . $sale->id . ' AUTORIZADA exitosamente!' . $emailMessage,
                         'type'    => 'success'
                     ]);
                 } else {
@@ -130,6 +134,44 @@ class InvoiceIndex extends Component
                 'message' => 'Error al procesar: ' . $e->getMessage(),
                 'type'    => 'error'
             ]);
+        }
+    }
+
+    private function sendAuthorizedInvoiceEmail(Sale $sale, string $signedXml): string
+    {
+        $email = $sale->customer?->email;
+
+        if (!$email) {
+            return ' El cliente no tiene correo registrado.';
+        }
+
+        if (!$sale->company?->mail_host || !$sale->company?->mail_username || !$sale->company?->mail_password) {
+            return ' La empresa no tiene configurado su servidor SMTP.';
+        }
+
+        try {
+            $company = $sale->company;
+            config([
+                'mail.mailers.company_smtp' => [
+                    'transport' => 'smtp',
+                    'host' => $company->mail_host,
+                    'port' => $company->mail_port ?: 587,
+                    'encryption' => $company->mail_encryption ?: 'tls',
+                    'username' => $company->mail_username,
+                    'password' => $company->mail_password,
+                    'timeout' => 30,
+                ],
+                'mail.from.address' => $company->email,
+                'mail.from.name' => $company->mail_from_name ?: $company->name,
+            ]);
+            Mail::purge('company_smtp');
+            Mail::mailer('company_smtp')->to($email)->send(new AuthorizedInvoiceMail($sale->load('customer'), $signedXml));
+
+            return ' XML enviado al correo del cliente.';
+        } catch (Exception $exception) {
+            report($exception);
+
+            return ' La factura está autorizada, pero no se pudo enviar el correo.';
         }
     }
 

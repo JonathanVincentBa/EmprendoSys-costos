@@ -171,6 +171,30 @@
                         </div>
                     </div>
 
+                    {{-- 4. SECCIÓN: SERVIDOR DE CORREO --}}
+                    <div class="pt-6 border-t border-zinc-200 dark:border-zinc-700 space-y-4">
+                        <div>
+                            <flux:heading size="lg">Correo para envío de facturas</flux:heading>
+                            <p class="mt-1 text-xs text-zinc-500">Configura el SMTP de la empresa para enviar el XML autorizado al cliente.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <flux:input label="Servidor SMTP" wire:model="mail_host" placeholder="smtp.gmail.com" />
+                            <flux:input label="Puerto" type="number" wire:model="mail_port" placeholder="587" />
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Cifrado</label>
+                                <select wire:model="mail_encryption" class="w-full rounded-md border-zinc-300 text-sm shadow-sm dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
+                                    <option value="tls">TLS</option>
+                                    <option value="ssl">SSL</option>
+                                    <option value="none">Sin cifrado</option>
+                                </select>
+                            </div>
+                            <flux:input label="Usuario SMTP" type="email" wire:model="mail_username" placeholder="correo@empresa.com" />
+                            <flux:input label="Contraseña SMTP" type="password" wire:model="mail_password" placeholder="Dejar vacío para conservarla" />
+                            <flux:input label="Nombre del remitente" wire:model="mail_from_name" placeholder="Mi Empresa" />
+                        </div>
+                    </div>
+
                     {{-- 4. SECCIÓN: FIRMA ELECTRÓNICA --}}
                     <div class="pt-6 border-t border-zinc-200 dark:border-zinc-700 space-y-4">
                         <flux:heading size="lg">Firma Digital (.p12 / .pfx)</flux:heading>

@@ -23,6 +23,12 @@ class Company extends Component
     public $establishment_address;
     public $phone;
     public $email;
+    public $mail_host;
+    public $mail_port = 587;
+    public $mail_username;
+    public $mail_password = '';
+    public $mail_encryption = 'tls';
+    public $mail_from_name;
     public $logo;
     public $current_logo;
     public $status = 'active';
@@ -66,6 +72,11 @@ class Company extends Component
             'establishment_address',
             'phone',
             'email',
+            'mail_host',
+            'mail_port',
+            'mail_username',
+            'mail_password',
+            'mail_from_name',
             'logo',
             'current_logo',
             'contribuyente_especial',
@@ -101,6 +112,12 @@ class Company extends Component
             $this->establishment_address  = $company->establishment_address;
             $this->phone                  = $company->phone;
             $this->email                  = $company->email;
+            $this->mail_host              = $company->mail_host;
+            $this->mail_port              = $company->mail_port ?? 587;
+            $this->mail_username          = $company->mail_username;
+            $this->mail_password          = '';
+            $this->mail_encryption        = $company->mail_encryption ?? 'tls';
+            $this->mail_from_name         = $company->mail_from_name ?? $company->name;
             $this->current_logo           = $company->logo;
             $this->status                 = $company->status ?? 'active';
 
@@ -166,6 +183,12 @@ class Company extends Component
             'razon_social'          => 'required|min:3',
             'ruc'                   => 'required|digits:13',
             'email'                 => 'required|email',
+            'mail_host'             => 'nullable|string|max:255',
+            'mail_port'             => 'nullable|integer|between:1,65535',
+            'mail_username'         => 'nullable|email|max:255',
+            'mail_password'         => 'nullable|string|max:500',
+            'mail_encryption'       => 'nullable|in:tls,ssl,none',
+            'mail_from_name'        => 'nullable|string|max:255',
             'estab'                 => 'required|digits:3',
             'pto_emi'               => 'required|digits:3',
             'obligado_contabilidad' => 'required|in:SI,NO',
@@ -186,6 +209,11 @@ class Company extends Component
                 'establishment_address' => $this->establishment_address ?? $this->address,
                 'phone'                 => $this->phone,
                 'email'                 => $this->email,
+                'mail_host'             => $this->mail_host,
+                'mail_port'             => $this->mail_port,
+                'mail_username'         => $this->mail_username,
+                'mail_encryption'       => $this->mail_encryption === 'none' ? null : $this->mail_encryption,
+                'mail_from_name'        => $this->mail_from_name ?: $this->name,
                 'status'                => $this->status,
                 'estab'                 => $this->estab,
                 'pto_emi'               => $this->pto_emi,
@@ -220,11 +248,16 @@ class Company extends Component
             $company->signature_password = $this->signature_password;
         }
 
+        if (!empty($this->mail_password)) {
+            $company->mail_password = $this->mail_password;
+        }
+
         $company->save();
 
         $this->has_signature = !empty($company->signature_path);
         $this->signature_password = '';
         $this->signature_file = null;
+        $this->mail_password = '';
 
         $this->dispatch('swal', [
             'message' => $this->company_id ? 'Datos actualizados correctamente' : 'Nueva empresa creada con éxito',

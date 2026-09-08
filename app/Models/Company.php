@@ -20,6 +20,12 @@ class Company extends Model
         'establishment_address',
         'phone',
         'email',
+        'mail_host',
+        'mail_port',
+        'mail_username',
+        'mail_password',
+        'mail_encryption',
+        'mail_from_name',
         'status',
         'logo',
         'estab',
@@ -88,6 +94,26 @@ class Company extends Model
                 return null;
             }
         }
+        return null;
+    }
+
+    public function setMailPasswordAttribute($value)
+    {
+        if (!empty($value)) {
+            $this->attributes['mail_password'] = encrypt($value);
+        }
+    }
+
+    public function getMailPasswordAttribute($value)
+    {
+        if (!empty($value)) {
+            try {
+                return decrypt($value);
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+
         return null;
     }
 }
