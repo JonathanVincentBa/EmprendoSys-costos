@@ -28,7 +28,10 @@ trait BelongsToCompany
                 $user = Auth::user();
                 // Si el usuario es super-admin, saltamos el filtro para que pueda ver TODO
                 if (! $user->hasRole('super-admin')) {
-                    $builder->where('company_id', $user->company_id);
+                    $builder->where(
+                        $builder->getModel()->qualifyColumn('company_id'),
+                        $user->company_id
+                    );
                 }
             }
         });

@@ -107,31 +107,56 @@ class PointOfSale extends Component
 
     public function selectProduct($id)
     {
-        $product = Product::find($id);
-        if ($product) {
-            $this->selectedProduct = $product;
-            $this->unit_price = $product->price ?? 0;
-            $this->productSearch = $product->name;
+        $product = Product::where('company_id', Auth::user()->company_id)
+            ->where('is_active', true)
+            ->find($id);
+
+        if (!$product) {
+            $this->dispatch('swal', ['message' => 'Producto no disponible', 'type' => 'error']);
+            return;
         }
+
+        $this->selectedProduct = $product;
+        $this->unit_price = $product->price;
+        $this->productSearch = $product->name;
     }
 
     public function addItem()
     {
-        if (!$this->selectedProduct) {
-            $this->dispatch('swal', ['message' => 'Seleccione un producto', 'type' => 'warning']);
+        $productId = data_get($this->selectedProduct, 'id');
+        if (!is_numeric($productId)) {
+            $this->addError('selectedProduct', 'Seleccione un producto.');
             return;
         }
 
-        if ($this->quantity > $this->selectedProduct->current_stock) {
+        $this->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $product = Product::where('company_id', Auth::user()->company_id)
+            ->where('is_active', true)
+            ->findOrFail($productId);
+
+        if ($this->quantity > $product->current_stock) {
             $this->dispatch('swal', ['message' => 'Stock insuficiente', 'type' => 'error']);
             return;
         }
 
-        $unitPrice = floatval($this->unit_price);
-        $qty = intval($this->quantity);
+        if ($product->price <= 0) {
+            $this->dispatch('swal', [
+                'message' => 'El producto no tiene un precio de venta válido.',
+                'type' => 'error',
+            ]);
+            return;
+        }
+
+        $this->selectedProduct = $product;
+        $unitPrice = round((float) $product->price, 2);
+        $qty = (int) $this->quantity;
         $baseTotal = $qty * $unitPrice;
 
-        $vatRateDecimal = $this->vat_rate / 100;
+        $vatRate = 15;
+        $vatRateDecimal = $vatRate / 100;
         $subtotal = $baseTotal / (1 + $vatRateDecimal);
         $vatAmount = $baseTotal - $subtotal;
 
@@ -144,7 +169,7 @@ class PointOfSale extends Component
             'vat_amount'  => round($vatAmount, 2),
             'total_price' => round($baseTotal, 2),
             'total'       => round($baseTotal, 2),
-            'vat_rate'    => $this->vat_rate,
+            'vat_rate'    => $vatRate,
             'vat_code'    => '4', // Código SRI para tarifa 15%
         ];
 
@@ -159,30 +184,76 @@ class PointOfSale extends Component
 
     public function store()
     {
-        if (!$this->selectedCustomer) {
-            $this->dispatch('swal', ['message' => 'Debe seleccionar un cliente', 'type' => 'warning']);
-            return;
-        }
-
-        if (empty($this->items)) {
-            $this->dispatch('swal', ['message' => 'El carrito está vacío', 'type' => 'warning']);
-            return;
-        }
+        $this->validate([
+            'selectedCustomer.id' => 'required|integer',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer',
+            'items.*.quantity' => 'required|integer|min:1',
+            'payment_method_sri' => 'required|in:01,19,20',
+        ]);
 
         $sale = null;
 
         try {
             DB::transaction(function () use (&$sale) {
-                $subtotal15 = collect($this->items)->sum('subtotal');
-                $ivaAmount = collect($this->items)->sum('vat_amount');
-                $total = collect($this->items)->sum('total');
+                $companyId = Auth::user()->company_id;
+                $customer = Customer::where('company_id', $companyId)
+                    ->findOrFail($this->selectedCustomer['id']);
+                $quantities = collect($this->items)
+                    ->groupBy('product_id')
+                    ->map(fn ($items) => $items->sum('quantity'));
+                $products = Product::where('company_id', $companyId)
+                    ->where('is_active', true)
+                    ->whereIn('id', $quantities->keys())
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                if ($products->count() !== $quantities->count()) {
+                    throw new Exception('Uno o más productos ya no están disponibles.');
+                }
+
+                foreach ($quantities as $productId => $quantity) {
+                    $product = $products->get($productId);
+                    if ($product->price <= 0 || $quantity > $product->current_stock) {
+                        throw new Exception(
+                            $product->price <= 0
+                                ? "El producto {$product->name} no tiene un precio válido."
+                                : "Stock insuficiente para {$product->name}."
+                        );
+                    }
+                }
+
+                $saleItems = collect($this->items)->map(function ($item) use ($products) {
+                    $product = $products->get($item['product_id']);
+                    $quantity = (int) $item['quantity'];
+                    $unitPrice = round((float) $product->price, 2);
+                    $totalPrice = round($quantity * $unitPrice, 2);
+                    $subtotal = round($totalPrice / 1.15, 2);
+                    $vatAmount = round($totalPrice - $subtotal, 2);
+
+                    return [
+                        'product' => $product,
+                        'quantity' => $quantity,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice,
+                        'subtotal' => $subtotal,
+                        'vat_amount' => $vatAmount,
+                    ];
+                });
+
+                $subtotal15 = $saleItems->sum('subtotal');
+                $ivaAmount = $saleItems->sum('vat_amount');
+                $total = $saleItems->sum('total_price');
 
                 $sale = Sale::create([
-                    'company_id'         => Auth::user()->company_id,
-                    'customer_id'        => $this->selectedCustomer['id'],
+                    'company_id'         => $companyId,
+                    'customer_id'        => $customer->id,
                     'user_id'            => Auth::id(),
                     'payment_method_sri' => $this->payment_method_sri,
                     'sale_date'          => now(),
+                    'sri_environment'    => Auth::user()->company->sri_environment ?? '1',
                     'subtotal_15'        => $subtotal15,
                     'subtotal_0'         => 0,
                     'iva_amount'         => $ivaAmount,
@@ -191,16 +262,16 @@ class PointOfSale extends Component
                     'sri_status'         => 'PENDING',
                 ]);
 
-                foreach ($this->items as $item) {
+                foreach ($saleItems as $item) {
                     SaleItem::create([
-                        'company_id'  => Auth::user()->company_id,
+                        'company_id'  => $companyId,
                         'sale_id'     => $sale->id,
-                        'product_id'  => $item['product_id'],
+                        'product_id'  => $item['product']->id,
                         'quantity'    => $item['quantity'],
                         'unit_price'  => $item['unit_price'],
                         'total_price' => $item['total_price'],
-                        'vat_code'    => $item['vat_code'],
-                        'vat_rate'    => $item['vat_rate'],
+                        'vat_code'    => '4',
+                        'vat_rate'    => 15,
                         'vat_amount'  => $item['vat_amount'],
                     ]);
 
@@ -262,10 +333,11 @@ class PointOfSale extends Component
                 // 5. Consultar Autorización
                 $authResult = $webService->authorizeInvoice($accessKey, $environment);
                 $authorization = $authResult['response'] ?? null;
-                $estadoSri = (string) ($authorization->autorizaciones->autorizacion->estado ?? 'EN PROCESO');
+                $authorizationDetails = SriWebService::firstAuthorization($authorization);
+                $estadoSri = (string) ($authorizationDetails->estado ?? 'EN PROCESO');
 
                 if ($estadoSri === 'AUTORIZADO') {
-                    $fechaAuth = $authorization->autorizaciones->autorizacion->fechaAutorizacion ?? now();
+                    $fechaAuth = $authorizationDetails->fechaAutorizacion ?? now();
                     $sale->update([
                         'sri_status'             => 'AUTORIZADO',
                         'sri_authorization_date' => $fechaAuth,
@@ -436,6 +508,7 @@ class PointOfSale extends Component
         if (strlen($this->productSearch) > 1 && (!$this->selectedProduct || $this->productSearch !== $this->selectedProduct->name)) {
             $products = Product::query()
                 ->where('company_id', $userCompanyId)
+                ->where('is_active', true)
                 ->where('current_stock', '>', 0)
                 ->where('name', 'like', '%' . $this->productSearch . '%')
                 ->limit(5)

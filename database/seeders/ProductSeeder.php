@@ -10,6 +10,7 @@ use App\Models\ProductionProcess;
 use App\Models\PackagingMaterial;
 use App\Models\LaborCost;
 use App\Models\OverheadConfig;
+use App\Services\CostCalculatorService;
 use Illuminate\Support\Facades\DB;
 
 class ProductSeeder extends Seeder
@@ -26,12 +27,9 @@ class ProductSeeder extends Seeder
         $overhead = OverheadConfig::where('company_id', $companyId)->where('is_profit_margin', false)->first();
         $margin = OverheadConfig::where('company_id', $companyId)->where('is_profit_margin', true)->first();
 
-        // Calcular costo por hora de mano de obra
-        $hourlyLaborCost = 0;
-        if ($labor) {
-            $totalMonthlySalary = $labor->monthly_salary * (1 + ($labor->iess_rate + $labor->decimo_tercero_rate + $labor->decimo_cuarto_rate + $labor->vacation_rate + $labor->fondo_reserva_rate) / 100);
-            $hourlyLaborCost = $totalMonthlySalary / 160; // 160 horas laborales al mes
-        }
+        $hourlyLaborCost = $labor
+            ? app(CostCalculatorService::class)->hourlyLaborRate($labor->company)
+            : 0;
 
         for ($i = 1; $i <= 10; $i++) {
             $batchSizeMl = 1000;

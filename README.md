@@ -1,24 +1,21 @@
-# 📦 EmprendoSys - Gestión de Costos Inteligente
+# EmprendoSys
 
-**EmprendoSys** es una solución robusta desarrollada para emprendedores que buscan profesionalizar su estructura de costos. El sistema automatiza el cálculo del valor real de producción integrando insumos, mano de obra y empaques.
+Sistema multiempresa para costos de producción, inventario, punto de venta y facturación electrónica de Ecuador.
 
-## ✨ Características Principales
-* **Wizard de Producción:** Asistente paso a paso para la creación de recetas y productos.
-* **Cálculo de Materia Prima:** Gestión de insumos con cálculo automático por unidad de medida (Kg/ml).
-* **Costos de Mano de Obra:** Registro de procesos productivos y cálculo de costos por hora-hombre.
-* **Suministros y Empaque:** Control total de materiales indirectos que afectan el precio final.
-* **Análisis de Ganancia:** Sugerencia automática de PVP (Precio de Venta al Público) basado en márgenes configurables.
+## Funciones
 
-## 🛠️ Stack Tecnológico
-* **Framework:** Laravel 12
-* **Reactividad:** Livewire 3
-* **Estilos:** Tailwind CSS
-* **Componentes:** Flux UI (Standard)
-* **Base de Datos:** SQLite por defecto; MySQL también está configurado.
+- Recetas por lote con materias primas, procesos, mano de obra, empaques y gastos indirectos.
+- Cálculo del costo unitario y sugerencia de precio de venta según un recargo configurable.
+- Punto de venta con control de stock, desglose del IVA del 15% y formas de pago del SRI.
+- Emisión de facturas electrónicas al SRI en ambiente de pruebas o producción.
+- Envío del XML firmado y autorizado al correo del cliente usando el SMTP configurado por empresa.
+- Catálogos, clientes, usuarios y datos operativos aislados por empresa.
 
-## 💻 Instalación local
+## Requisitos
 
-Necesitas PHP 8.3 o superior con las extensiones de Laravel y SQLite habilitadas, Composer, Node.js y npm, y Git.
+PHP 8.3 o superior, Composer, Node.js/npm y las extensiones PHP requeridas por Laravel, incluidas SOAP, cURL y OpenSSL para la integración con el SRI.
+
+## Instalación local
 
 ```bash
 git clone https://github.com/JonathanVincentBa/EmprendoSys-costos.git
@@ -27,14 +24,12 @@ composer setup
 composer run dev
 ```
 
-`composer setup` instala las dependencias de PHP y JavaScript, crea `.env` y la base SQLite, genera la clave de la aplicación, ejecuta las migraciones y compila los recursos. Al iniciar el entorno con `composer run dev`, abre la dirección local que muestra Laravel en la terminal.
+`composer setup` instala dependencias, prepara `.env`, genera la clave de la aplicación, ejecuta las migraciones y compila los recursos. Registra un usuario para iniciar sesión.
 
-Para iniciar sesión por primera vez, registra un usuario desde la pantalla de registro de la aplicación.
+Antes de emitir facturas, configura en el perfil de la empresa los datos tributarios y la firma electrónica `.p12`; para enviar comprobantes por correo, configura también el servidor SMTP de la empresa. Verifica primero el flujo en ambiente de pruebas antes de seleccionar producción.
 
-## 🚀 Próximas Actualizaciones
-- [ ] Punto de Venta (POS) integrado.
-- [ ] Facturación Electrónica.
-- [ ] Alarmas de Stock Mínimo con notificaciones.
+## Pruebas
 
----
-Desarrollado con ❤️ para impulsar el crecimiento de los emprendedores.
+```bash
+php artisan test
+```

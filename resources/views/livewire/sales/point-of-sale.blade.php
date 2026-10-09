@@ -82,7 +82,7 @@
                         </div>
                         <div>
                             <span class="text-[10px] font-extrabold uppercase text-zinc-400 tracking-wider block">Identificación</span>
-                            <p class="text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ $selectedCustomer['identification'] }}</p>
+                            <p class="text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ $selectedCustomer['identification'] ?? 'Sin identificación' }}</p>
                         </div>
                         <div>
                             <span class="text-[10px] font-extrabold uppercase text-zinc-400 tracking-wider block">Correo Electrónico</span>

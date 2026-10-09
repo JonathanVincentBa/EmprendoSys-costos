@@ -20,7 +20,7 @@ class ProductCostSeeder extends Seeder
         $materials = [
             ['code' => "MP-HAR-C{$id}", 'name' => 'Harina Industrial', 'cost' => 1.25, 'unit' => 'kg'],
             ['code' => "MP-AZU-C{$id}", 'name' => 'Azúcar Blanca', 'cost' => 0.90, 'unit' => 'kg'],
-            ['code' => "MP-AGU-C{$id}", 'name' => 'Agua Purificada', 'cost' => 0.10, 'unit' => 'L'],
+            ['code' => "MP-AGU-C{$id}", 'name' => 'Agua Purificada', 'cost' => 0.10, 'unit' => 'l'],
         ];
 
         foreach ($materials as $m) {
@@ -82,13 +82,13 @@ class ProductCostSeeder extends Seeder
 
         // 6. GASTOS INDIRECTOS Y MARGEN
         OverheadConfig::updateOrCreate(
-            ['company_id' => $id, 'name' => 'Servicios Básicos y Arriendo'],
-            ['percentage' => 15.00, 'is_profit_margin' => false]
+            ['company_id' => $id, 'is_profit_margin' => false],
+            ['name' => 'Servicios Básicos y Arriendo', 'percentage' => 15.00]
         );
 
         OverheadConfig::updateOrCreate(
-            ['company_id' => $id, 'name' => 'Margen de Utilidad'],
-            ['percentage' => 30.00, 'is_profit_margin' => true]
+            ['company_id' => $id, 'is_profit_margin' => true],
+            ['name' => 'Margen de Utilidad', 'percentage' => 30.00]
         );
     }
 }

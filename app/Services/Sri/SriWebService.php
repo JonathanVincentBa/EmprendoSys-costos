@@ -26,9 +26,9 @@ class SriWebService
 
             $context = stream_context_create([
                 'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true,
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                    'allow_self_signed' => false,
                 ],
                 'http' => [
                     'timeout' => 30,
@@ -64,6 +64,10 @@ class SriWebService
 
         for ($attempt = 1; $attempt <= 3 && $contents === false; $attempt++) {
             $curl = curl_init($wsdl);
+            if ($curl === false) {
+                throw new Exception('No se pudo iniciar la conexión con el WSDL del SRI.');
+            }
+
             curl_setopt_array($curl, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FOLLOWLOCATION => true,
@@ -71,16 +75,17 @@ class SriWebService
                 CURLOPT_TIMEOUT => 30,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_USERAGENT => 'EmprendoSys SRI Client',
             ]);
 
             $contents = curl_exec($curl);
             $error = curl_error($curl);
+            $statusCode = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
             curl_close($curl);
 
-            if ($contents === '') {
+            if ($contents === false || $statusCode < 200 || $statusCode >= 300 || $contents === '') {
                 $contents = false;
             }
         }
@@ -113,6 +118,21 @@ class SriWebService
         }
     }
 
+    public static function firstAuthorization(mixed $response): ?object
+    {
+        $authorization = data_get($response, 'autorizaciones.autorizacion');
+
+        if (is_array($authorization)) {
+            $authorization = reset($authorization);
+        }
+
+        if (is_array($authorization)) {
+            $authorization = (object) $authorization;
+        }
+
+        return is_object($authorization) ? $authorization : null;
+    }
+
     public function authorizeInvoice(string $accessKey, string $environment = '1'): array
     {
         $wsdl = ($environment === '2') ? self::WSDL_PROD_AUTORIZACION : self::WSDL_TEST_AUTORIZACION;
@@ -124,9 +144,9 @@ class SriWebService
 
             $context = stream_context_create([
                 'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true,
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                    'allow_self_signed' => false,
                 ],
                 'http' => [
                     'timeout' => 30,

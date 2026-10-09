@@ -52,12 +52,35 @@
                     <tbody>
                         @foreach($ingredients as $ing)
                             <tr class="border-b border-zinc-100">
-                                <td class="py-2 text-sm">{{ $ing['name'] }}</td>
-                                <td class="py-2 text-sm text-right font-bold">${{ number_format($ing['subtotal'], 2) }}</td>
+                                <td class="py-2 text-sm">{{ $ing['name'] ?? 'Materia prima' }}</td>
+                                <td class="py-2 text-sm text-right font-bold">${{ number_format($ing['subtotal'] ?? 0, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+
+                <div class="flex gap-4 items-end bg-zinc-50 p-4 rounded-lg">
+                    <flux:select wire:model="selected_supply_id" label="Suministro" class="flex-1">
+                        <option value="">Seleccione...</option>
+                        @foreach($all_supplies as $supply)
+                            <option value="{{ $supply->id }}">{{ $supply->name }} (${{ $supply->unit_cost }})</option>
+                        @endforeach
+                    </flux:select>
+                    <flux:input wire:model="supply_quantity" label="Cantidad por lote" type="number" step="0.0001" class="w-32" />
+                    <flux:button wire:click="addSupply" variant="filled">Añadir suministro</flux:button>
+                </div>
+
+                @if($selected_supplies)
+                    <ul class="space-y-1">
+                        @foreach($selected_supplies as $selection)
+                            @php($supply = $all_supplies->firstWhere('id', $selection['id'] ?? null))
+                            <li class="flex justify-between text-sm">
+                                <span>{{ $supply?->name ?? 'Suministro' }} ({{ $selection['quantity'] ?? 0 }})</span>
+                                <strong>${{ number_format(($selection['quantity'] ?? 0) * ($supply?->unit_cost ?? 0), 2) }}</strong>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         @endif
 
@@ -77,7 +100,10 @@
                 <div class="grid gap-2">
                     @foreach($selected_processes as $index => $sp)
                         <div class="flex justify-between p-3 bg-zinc-50 rounded border border-zinc-200 items-center">
-                            <div><p class="font-bold text-sm">{{ $sp['name'] }}</p><p class="text-xs text-zinc-500">Costo: ${{ $sp['cost'] }}</p></div>
+                            <div>
+                                <p class="font-bold text-sm">{{ $sp['name'] }}</p>
+                                <p class="text-xs text-zinc-500">Costo por hora: ${{ number_format($sp['cost'], 2) }}</p>
+                            </div>
                             <div class="flex items-center gap-2">
                                 <input type="number" wire:model.live="selected_processes.{{ $index }}.hours" class="w-16 p-1 text-center border rounded">
                                 <span class="text-sm font-bold">${{ number_format($sp['cost'] * $sp['hours'], 2) }}</span>
@@ -93,13 +119,16 @@
             <div class="grid md:grid-cols-2 gap-8">
                 <div class="bg-zinc-50 p-6 rounded-xl border border-zinc-200">
                     <h3 class="font-bold mb-4 border-b pb-2">Desglose de Costos</h3>
-                    <div class="flex justify-between mb-2"><span>Materia Prima:</span><strong>${{ number_format($res['materials'], 2) }}</strong></div>
+                    <div class="flex justify-between mb-2"><span>Materia Prima:</span><strong>${{ number_format($res['material'], 2) }}</strong></div>
                     <div class="flex justify-between mb-2 border-b pb-2"><span>Mano de Obra:</span><strong>${{ number_format($res['labor'], 2) }}</strong></div>
+                    <div class="flex justify-between mb-2"><span>Empaque del lote:</span><strong>${{ number_format($res['packaging'], 2) }}</strong></div>
+                    <div class="flex justify-between mb-2"><span>Suministros:</span><strong>${{ number_format($res['supplies'], 2) }}</strong></div>
+                    <div class="flex justify-between mb-2"><span>Gastos indirectos ({{ number_format($res['indirects_pct'], 2) }}%):</span><strong>${{ number_format($res['total_lote'] - $res['material'] - $res['labor'] - $res['packaging'] - $res['supplies'], 2) }}</strong></div>
                     <div class="flex justify-between text-lg font-bold"><span>COSTO TOTAL:</span><span>${{ number_format($res['total'], 2) }}</span></div>
                 </div>
 
                 <div class="bg-green-600 p-6 rounded-xl text-white text-center shadow-lg">
-                    <p class="text-xs uppercase font-bold opacity-80">Precio de Venta Sugerido (Ganancia {{ $margin }}%)</p>
+                    <p class="text-xs uppercase font-bold opacity-80">Precio sugerido (recargo sobre costo {{ $margin }}%)</p>
                     <p class="text-5xl font-black mt-2">${{ number_format($res['suggested'], 2) }}</p>
                     <div class="mt-4 flex items-center justify-center gap-2">
                         <span>Ajustar Margen:</span>

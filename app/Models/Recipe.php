@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\CostCalculatorService;
 
 class Recipe extends Model
 {
@@ -25,7 +26,13 @@ class Recipe extends Model
     }
     public function processes()
     {
-        return $this->belongsToMany(ProductionProcess::class, 'recipe_processes');
+        return $this->belongsToMany(
+            ProductionProcess::class,
+            'recipe_processes',
+            'recipe_id',
+            'process_id'
+        )
+            ->withPivot('hours_per_batch');
     }
     public function supplyUsages()
     {
@@ -41,18 +48,13 @@ class Recipe extends Model
     public function getIngredientsCostAttribute()
     {
         return $this->items->sum(function ($item) {
-            return $item->quantity_kg * $item->rawMaterial->unit_cost;
+            return $item->quantity_kg * ($item->rawMaterial?->unit_cost ?? 0);
         });
     }
 
     // Costo de Mano de Obra basado en los procesos
     public function getLaborCostAttribute()
     {
-        // Aquí vincularemos con la tabla LaborCost que configuramos antes
-        // usando las horas del proceso
-        return $this->processes->sum(function ($process) {
-            // Lógica para multiplicar horas por costo/hora del rol asignado
-            return $process->hours_per_batch * ($this->company->labor_rate_average ?? 0);
-        });
+        return app(CostCalculatorService::class)->calculateLaborCost($this);
     }
 }

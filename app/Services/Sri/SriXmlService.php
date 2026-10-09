@@ -11,10 +11,12 @@ class SriXmlService
 {
     public static function generateAccessKey(Sale $sale, Company $company): string
     {
-        $date = now('America/Guayaquil')->format('dmY');
+        $date = $sale->sale_date
+            ? $sale->sale_date->timezone('America/Guayaquil')->format('dmY')
+            : now('America/Guayaquil')->format('dmY');
         $type = '01'; // Factura
         $ruc = str_pad($company->ruc, 13, '0', STR_PAD_LEFT);
-        $environment = $company->sri_environment ?? '1';
+        $environment = $sale->sri_environment ?? $company->sri_environment ?? '1';
 
         $estab = str_pad($company->estab ?? '001', 3, '0', STR_PAD_LEFT);
         $ptoEmi = str_pad($company->pto_emi ?? '001', 3, '0', STR_PAD_LEFT);
@@ -56,7 +58,7 @@ class SriXmlService
 
         // 1. infoTributaria
         $infoTributaria = $xml->addChild('infoTributaria');
-        $infoTributaria->addChild('ambiente', $company->sri_environment ?? '1');
+        $infoTributaria->addChild('ambiente', $sale->sri_environment ?? $company->sri_environment ?? '1');
         $infoTributaria->addChild('tipoEmision', '1');
         $infoTributaria->addChild('razonSocial', $company->razon_social ?? $company->name);
         $infoTributaria->addChild('nombreComercial', $company->name);
@@ -74,7 +76,9 @@ class SriXmlService
 
         // 2. infoFactura
         $infoFactura = $xml->addChild('infoFactura');
-        $emissionDate = now('America/Guayaquil');
+        $emissionDate = $sale->sale_date
+            ? $sale->sale_date->timezone('America/Guayaquil')
+            : now('America/Guayaquil');
         $infoFactura->addChild('fechaEmision', $emissionDate->format('d/m/Y'));
         $infoFactura->addChild('dirEstablecimiento', $company->establishment_address ?? $company->address ?? 'N/A');
 

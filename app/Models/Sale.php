@@ -27,6 +27,7 @@ class Sale extends Model
         'discount_amount',
         'status',
         'sri_access_key',
+        'sri_environment',
         'sri_status',
         'sri_response',
         'sri_authorization_date',

@@ -44,7 +44,7 @@ class InvoiceIndex extends Component
             $webService = app(SriWebService::class);
 
             $company = $sale->company;
-            $environment = (string) ($company->sri_environment ?? '1');
+            $environment = (string) ($sale->sri_environment ?? $company->sri_environment ?? '1');
 
             if (empty($sale->sri_access_key)) {
                 $accessKey = SriXmlService::generateAccessKey($sale, $company);
@@ -63,10 +63,11 @@ class InvoiceIndex extends Component
             if (($receptionResult['status'] ?? '') === 'RECIBIDA') {
                 $authResult = $webService->authorizeInvoice($accessKey, $environment);
                 $authorization = $authResult['response'] ?? null;
-                $estadoSri = (string) ($authorization->autorizaciones->autorizacion->estado ?? 'EN PROCESO');
+                $authorizationDetails = SriWebService::firstAuthorization($authorization);
+                $estadoSri = (string) ($authorizationDetails->estado ?? 'EN PROCESO');
 
                 if ($estadoSri === 'AUTORIZADO') {
-                    $fechaAuth = $authResult['response']->autorizaciones->autorizacion->fechaAutorizacion ?? now();
+                    $fechaAuth = $authorizationDetails->fechaAutorizacion ?? now();
                     $sale->update([
                         'sri_status'             => 'AUTORIZADO',
                         'sri_authorization_date' => $fechaAuth,
@@ -78,6 +79,17 @@ class InvoiceIndex extends Component
                     $this->dispatch('swal', [
                         'message' => '¡Factura N° ' . $sale->id . ' AUTORIZADA exitosamente!' . $emailMessage,
                         'type'    => 'success'
+                    ]);
+                } elseif (($authResult['status'] ?? '') === 'ERROR') {
+                    $sale->update([
+                        'sri_status' => 'ERROR',
+                        'sri_response' => $authResult['message'] ?? 'Error consultando autorización SRI',
+                    ]);
+
+                    $this->dispatch('swal', [
+                        'message' => 'La factura fue recibida, pero no se pudo consultar su autorización: '
+                            . ($authResult['message'] ?? 'Error desconocido'),
+                        'type' => 'error',
                     ]);
                 } else {
                     $sale->update([
