@@ -14,7 +14,22 @@
 * **Reactividad:** Livewire 3
 * **Estilos:** Tailwind CSS
 * **Componentes:** Flux UI (Standard)
-* **Base de Datos:** MySQL
+* **Base de Datos:** SQLite por defecto; MySQL también está configurado.
+
+## 💻 Instalación local
+
+Necesitas PHP 8.3 o superior con las extensiones de Laravel y SQLite habilitadas, Composer, Node.js y npm, y Git.
+
+```bash
+git clone https://github.com/JonathanVincentBa/EmprendoSys-costos.git
+cd EmprendoSys-costos
+composer setup
+composer run dev
+```
+
+`composer setup` instala las dependencias de PHP y JavaScript, crea `.env` y la base SQLite, genera la clave de la aplicación, ejecuta las migraciones y compila los recursos. Al iniciar el entorno con `composer run dev`, abre la dirección local que muestra Laravel en la terminal.
+
+Para iniciar sesión por primera vez, registra un usuario desde la pantalla de registro de la aplicación.
 
 ## 🚀 Próximas Actualizaciones
 - [ ] Punto de Venta (POS) integrado.
