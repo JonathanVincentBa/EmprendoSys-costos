@@ -31,7 +31,7 @@
                         <th class="w-28 px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">Total</th>
                         <th class="w-80 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">Clave de acceso</th>
                         <th class="w-32 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">Estado</th>
-                        <th class="w-36 px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">Acciones</th>
+                        <th class="w-48 px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
@@ -68,9 +68,12 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 text-right">
-                                @if(in_array($sale->sri_status, ['DEVUELTA', 'NO AUTORIZADO', 'ERROR', 'PENDING', 'RECIBIDA', 'EN PROCESO', null]))
+                                @if($sale->sri_status === 'AUTORIZADO')
+                                    <flux:button wire:click="reenviarCorreo({{ $sale->id }})" wire:loading.attr="disabled"
+                                        wire:target="reenviarCorreo({{ $sale->id }})" variant="ghost" size="sm" icon="envelope">Reenviar correo</flux:button>
+                                @elseif(in_array($sale->sri_status, ['DEVUELTA', 'NO AUTORIZADO', 'ERROR', 'PENDING', 'RECIBIDA', 'EN PROCESO', null]))
                                     <flux:button wire:click="reemitirSri({{ $sale->id }})" wire:loading.attr="disabled"
-                                        wire:target="reemitirSri({{ $sale->id }})" variant="ghost" size="sm" icon="arrow-path">Reenviar</flux:button>
+                                        wire:target="reemitirSri({{ $sale->id }})" variant="ghost" size="sm" icon="arrow-path">Reintentar SRI</flux:button>
                                 @endif
                             </td>
                         </tr>

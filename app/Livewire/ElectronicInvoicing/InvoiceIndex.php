@@ -8,9 +8,8 @@ use App\Models\Sale;
 use App\Services\Sri\SriXmlService;
 use App\Services\Sri\SriSignatureService;
 use App\Services\Sri\SriWebService;
-use App\Mail\AuthorizedInvoiceMail;
+use App\Services\AuthorizedInvoiceEmailService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use Exception;
 
 class InvoiceIndex extends Component
@@ -32,10 +31,20 @@ class InvoiceIndex extends Component
 
     public function reemitirSri($saleId)
     {
-        $sale = Sale::with(['customer', 'company', 'items.product'])->find($saleId);
+        $sale = Sale::with(['customer', 'company', 'items.product'])
+            ->where('company_id', Auth::user()->company_id)
+            ->find($saleId);
 
         if (!$sale) {
             $this->dispatch('swal', ['message' => 'Comprobante no encontrado', 'type' => 'error']);
+            return;
+        }
+
+        if ($sale->sri_status === 'AUTORIZADO') {
+            $this->dispatch('swal', [
+                'message' => 'La factura ya está autorizada. Usa "Reenviar correo" para entregarla nuevamente al cliente.',
+                'type' => 'warning',
+            ]);
             return;
         }
 
@@ -149,41 +158,53 @@ class InvoiceIndex extends Component
         }
     }
 
-    private function sendAuthorizedInvoiceEmail(Sale $sale, string $signedXml): string
+    public function reenviarCorreo($saleId): void
     {
-        $email = $sale->customer?->email;
+        $sale = Sale::with(['customer', 'company', 'items.product'])
+            ->where('company_id', Auth::user()->company_id)
+            ->find($saleId);
 
-        if (!$email) {
-            return ' El cliente no tiene correo registrado.';
+        if (!$sale) {
+            $this->dispatch('swal', ['message' => 'Comprobante no encontrado', 'type' => 'error']);
+            return;
         }
 
-        if (!$sale->company?->mail_host || !$sale->company?->mail_username || !$sale->company?->mail_password) {
-            return ' La empresa no tiene configurado su servidor SMTP.';
+        if ($sale->sri_status !== 'AUTORIZADO' || !$sale->sri_access_key) {
+            $this->dispatch('swal', [
+                'message' => 'Solo se puede reenviar por correo una factura autorizada por el SRI.',
+                'type' => 'warning',
+            ]);
+            return;
         }
 
         try {
-            $company = $sale->company;
-            config([
-                'mail.mailers.company_smtp' => [
-                    'transport' => 'smtp',
-                    'host' => $company->mail_host,
-                    'port' => $company->mail_port ?: 587,
-                    'encryption' => $company->mail_encryption ?: 'tls',
-                    'username' => $company->mail_username,
-                    'password' => $company->mail_password,
-                    'timeout' => 30,
-                ],
-                'mail.from.address' => $company->email,
-                'mail.from.name' => $company->mail_from_name ?: $company->name,
-            ]);
-            Mail::purge('company_smtp');
-            Mail::mailer('company_smtp')->to($email)->send(new AuthorizedInvoiceMail($sale->load('customer'), $signedXml));
+            $xml = SriXmlService::buildInvoiceXml($sale, $sale->company, $sale->sri_access_key);
+            $signedXml = app(SriSignatureService::class)->signXml($xml, $sale->company);
+            app(AuthorizedInvoiceEmailService::class)->send($sale, $signedXml);
 
-            return ' XML enviado al correo del cliente.';
+            $this->dispatch('swal', [
+                'message' => 'La factura PDF y el XML fueron enviados a ' . $sale->customer?->email . '.',
+                'type' => 'success',
+            ]);
+        } catch (Exception $exception) {
+            report($exception);
+            $this->dispatch('swal', [
+                'message' => 'No se pudo reenviar el correo: ' . $exception->getMessage(),
+                'type' => 'error',
+            ]);
+        }
+    }
+
+    private function sendAuthorizedInvoiceEmail(Sale $sale, string $signedXml): string
+    {
+        try {
+            app(AuthorizedInvoiceEmailService::class)->send($sale, $signedXml);
+
+            return ' PDF y XML enviados al correo del cliente.';
         } catch (Exception $exception) {
             report($exception);
 
-            return ' La factura está autorizada, pero no se pudo enviar el correo.';
+            return ' La factura está autorizada, pero no se pudo enviar el correo: ' . $exception->getMessage();
         }
     }
 

@@ -10,10 +10,9 @@ use App\Models\Customer;
 use App\Services\Sri\SriXmlService;
 use App\Services\Sri\SriSignatureService;
 use App\Services\Sri\SriWebService;
-use App\Mail\AuthorizedInvoiceMail;
+use App\Services\AuthorizedInvoiceEmailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Exception;
 
 class PointOfSale extends Component
@@ -400,39 +399,14 @@ class PointOfSale extends Component
 
     private function sendAuthorizedInvoiceEmail(Sale $sale, string $signedXml): string
     {
-        $email = $sale->customer?->email;
-
-        if (!$email) {
-            return ' El cliente no tiene correo electrónico registrado.';
-        }
-
-        if (!$sale->company?->mail_host || !$sale->company?->mail_username || !$sale->company?->mail_password) {
-            return ' La empresa no tiene configurado su servidor SMTP.';
-        }
-
         try {
-            $company = $sale->company;
-            config([
-                'mail.mailers.company_smtp' => [
-                    'transport' => 'smtp',
-                    'host' => $company->mail_host,
-                    'port' => $company->mail_port ?: 587,
-                    'encryption' => $company->mail_encryption ?: 'tls',
-                    'username' => $company->mail_username,
-                    'password' => $company->mail_password,
-                    'timeout' => 30,
-                ],
-                'mail.from.address' => $company->email,
-                'mail.from.name' => $company->mail_from_name ?: $company->name,
-            ]);
-            Mail::purge('company_smtp');
-            Mail::mailer('company_smtp')->to($email)->send(new AuthorizedInvoiceMail($sale->load('customer'), $signedXml));
+            app(AuthorizedInvoiceEmailService::class)->send($sale, $signedXml);
 
-            return ' XML enviado al correo del cliente.';
+            return ' PDF y XML enviados al correo del cliente.';
         } catch (Exception $exception) {
             report($exception);
 
-            return ' La factura está autorizada, pero no se pudo enviar el correo.';
+            return ' La factura está autorizada, pero no se pudo enviar el correo: ' . $exception->getMessage();
         }
     }
 

@@ -16,6 +16,7 @@ class AuthorizedInvoiceMail extends Mailable
     public function __construct(
         public Sale $sale,
         public string $signedXml,
+        public string $pdfContent,
     ) {
     }
 
@@ -36,6 +37,10 @@ class AuthorizedInvoiceMail extends Mailable
     public function attachments(): array
     {
         return [
+            \Illuminate\Mail\Mailables\Attachment::fromData(
+                fn () => $this->pdfContent,
+                'factura-' . $this->sale->id . '.pdf'
+            )->withMime('application/pdf'),
             \Illuminate\Mail\Mailables\Attachment::fromData(
                 fn () => $this->signedXml,
                 'factura-' . $this->sale->sri_access_key . '.xml'

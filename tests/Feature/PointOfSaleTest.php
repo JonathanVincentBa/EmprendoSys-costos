@@ -1,6 +1,7 @@
 <?php
 
 use App\Mail\AuthorizedInvoiceMail;
+use App\Livewire\ElectronicInvoicing\InvoiceIndex;
 use App\Livewire\Sales\PointOfSale;
 use App\Models\Company;
 use App\Models\Customer;
@@ -141,5 +142,93 @@ test('an authorized invoice is emailed to the customer with its signed XML', fun
         ->call('store');
 
     expect(Sale::query()->latest('id')->value('sri_status'))->toBe('AUTORIZADO');
-    Mail::assertSent(AuthorizedInvoiceMail::class, fn ($mail) => $mail->hasTo('cliente@example.com'));
+    Mail::assertSent(AuthorizedInvoiceMail::class, function ($mail) {
+        expect($mail->hasTo('cliente@example.com'))->toBeTrue()
+            ->and(str_starts_with($mail->pdfContent, '%PDF-'))->toBeTrue()
+            ->and(count($mail->attachments()))->toBe(2);
+
+        $mail->assertHasAttachment($mail->attachments()[0]);
+        $mail->assertHasAttachment($mail->attachments()[1]);
+
+        return true;
+    });
+});
+
+test('an authorized invoice can be resent by email without resubmitting it to SRI', function () {
+    $this->actingAs($this->user);
+    $this->company->update([
+        'mail_host' => 'smtp.example.com',
+        'mail_port' => 587,
+        'mail_username' => 'billing@example.com',
+        'mail_password' => 'smtp-secret',
+        'mail_encryption' => 'tls',
+    ]);
+    $sale = Sale::create([
+        'company_id' => $this->company->id,
+        'customer_id' => $this->customer->id,
+        'user_id' => $this->user->id,
+        'sale_date' => now(),
+        'total' => 11.50,
+        'subtotal_15' => 10,
+        'iva_amount' => 1.50,
+        'status' => 'completed',
+        'sri_access_key' => str_repeat('1', 49),
+        'sri_environment' => '2',
+        'sri_status' => 'AUTORIZADO',
+    ]);
+    SaleItem::create([
+        'company_id' => $this->company->id,
+        'sale_id' => $sale->id,
+        'product_id' => $this->product->id,
+        'quantity' => 1,
+        'unit_price' => 11.50,
+        'total_price' => 11.50,
+        'vat_code' => '4',
+        'vat_rate' => 15,
+        'vat_amount' => 1.50,
+    ]);
+    Mail::fake();
+    $this->mock(SriSignatureService::class)
+        ->shouldReceive('signXml')
+        ->once()
+        ->andReturn('<signed-invoice/>');
+
+    Livewire::test(InvoiceIndex::class)
+        ->assertSee('Reenviar correo')
+        ->call('reenviarCorreo', $sale->id)
+        ->assertDispatched('swal');
+
+    expect($sale->fresh()->sri_status)->toBe('AUTORIZADO');
+    Mail::assertSent(AuthorizedInvoiceMail::class, function ($mail) {
+        expect($mail->hasTo('cliente@example.com'))->toBeTrue()
+            ->and(str_starts_with($mail->pdfContent, '%PDF-'))->toBeTrue()
+            ->and(count($mail->attachments()))->toBe(2);
+
+        return true;
+    });
+});
+
+test('authorized invoice cannot be sent to the SRI again from the retry action', function () {
+    $this->actingAs($this->user);
+    $sale = Sale::create([
+        'company_id' => $this->company->id,
+        'customer_id' => $this->customer->id,
+        'user_id' => $this->user->id,
+        'sale_date' => now(),
+        'total' => 11.50,
+        'status' => 'completed',
+        'sri_access_key' => str_repeat('2', 49),
+        'sri_environment' => '2',
+        'sri_status' => 'AUTORIZADO',
+    ]);
+    $webService = $this->mock(SriWebService::class);
+    $webService->shouldNotReceive('sendXml');
+
+    Livewire::test(InvoiceIndex::class)
+        ->assertSee('Reenviar correo')
+        ->assertDontSee('Reintentar SRI')
+        ->call('reemitirSri', $sale->id)
+        ->assertDispatched('swal');
+
+    expect($sale->fresh()->sri_status)->toBe('AUTORIZADO');
 });
