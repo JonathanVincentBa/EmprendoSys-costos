@@ -1,20 +1,20 @@
-<div class="p-6 max-w-400 mx-auto space-y-6 bg-zinc-50/50 dark:bg-zinc-950 min-h-screen">
+<div class="mx-auto min-h-screen max-w-7xl space-y-6 bg-zinc-50/70 p-4 dark:bg-zinc-950 sm:p-6">
     {{-- Header Principal --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-zinc-200 dark:border-zinc-800">
         <div>
             <h1 class="text-2xl font-black tracking-tight text-zinc-900 dark:text-white flex items-center gap-2">
-                <span class="p-2 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-500/30">
+                <span class="rounded-xl bg-indigo-700 p-2 text-white shadow-lg shadow-indigo-500/30">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 </span>
                 Punto de Venta / Facturación SRI
             </h1>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Emisión rápida de comprobantes electrónicos con desgloses fiscales automáticos.</p>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Ventas e información fiscal organizadas en un solo flujo.</p>
         </div>
         
         <div class="flex items-center gap-2">
-            <span class="px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-full border border-emerald-500/20 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                SRI En Línea
+            <span class="flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-200">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Punto de venta
             </span>
         </div>
     </div>
@@ -44,9 +44,9 @@
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
-                        <input wire:model.live="customerSearch" type="text" placeholder="Buscar cliente por Nombre, Cédula o RUC..." 
+                        <input wire:model.live.debounce.450ms="customerSearch" type="text" placeholder="Buscar cliente por nombre, cédula o RUC..."
                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 text-sm focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-indigo-500 dark:text-white transition-all">
-                        
+
                         @if($customers->isNotEmpty())
                             <div class="absolute z-50 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl mt-2 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-700/50">
                                 @foreach($customers as $c)
@@ -100,22 +100,41 @@
             <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-5 shadow-sm">
                 <div class="flex flex-col items-stretch gap-3 w-full sm:flex-row sm:items-end">
                     <div class="relative min-w-0 flex-1">
-                        <label class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider block mb-1.5">Buscar Producto</label>
+                        <label for="product-search" class="text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider block mb-1.5">Producto</label>
                         <div class="relative">
-                            <input wire:model.live="productSearch" type="text" placeholder="Escriba para buscar por nombre o código..." 
-                                   class="w-full pl-3 pr-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 text-sm focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-indigo-500 dark:text-white transition-all">
+                            <input id="product-search" wire:model.live.debounce.500ms="productSearch" type="search" autocomplete="off" placeholder="Buscar por nombre o SKU..."
+                                   class="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-3 pl-10 pr-4 text-sm transition-all focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-white dark:focus:bg-zinc-800">
+                            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.3-4.3m1.8-5.2a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"></path></svg>
                         </div>
-                        
+                        <p class="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">Escribe al menos 2 caracteres. Buscaremos cuando termines de escribir.</p>
+
+                        @error('selectedProduct')
+                            <p class="mt-2 text-sm font-medium text-red-600" role="alert">{{ $message }}</p>
+                        @enderror
+
+                        <div wire:loading.delay wire:target="productSearch" class="absolute z-50 mt-2 w-full rounded-xl border border-indigo-100 bg-white px-4 py-3 text-sm text-zinc-500 shadow-lg dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                            Buscando productos...
+                        </div>
+
                         @if(!empty($products))
-                            <div class="absolute z-50 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl mt-2 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-700/50">
+                            <div class="absolute z-40 mt-2 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
                                 @foreach($products as $p)
-                                    <button wire:click="selectProduct({{ $p->id }})" class="w-full text-left p-3.5 hover:bg-indigo-600 hover:text-white transition-colors flex justify-between items-center dark:text-white group">
-                                        <span class="font-bold text-sm">{{ $p->name }}</span>
-                                        <span class="text-[10px] px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 group-hover:bg-white group-hover:text-indigo-600 rounded-md font-black">
-                                            STOCK: {{ $p->current_stock }}
+                                    <button wire:key="pos-product-{{ $p->id }}" wire:click="selectProduct({{ $p->id }})" type="button" class="flex w-full items-center justify-between gap-3 border-b border-zinc-100 p-3.5 text-left transition last:border-0 hover:bg-indigo-50 dark:border-zinc-700 dark:hover:bg-indigo-950/40">
+                                        <span class="min-w-0">
+                                            <span class="block truncate text-sm font-bold text-zinc-800 dark:text-zinc-100">{{ $p->name }}</span>
+                                            <span class="mt-0.5 block text-xs font-medium text-zinc-500 dark:text-zinc-400">SKU: {{ $p->sku ?: 'Sin código' }} · ${{ number_format($p->price, 2) }}</span>
+                                        </span>
+                                        <span class="shrink-0 rounded-lg bg-emerald-50 px-2.5 py-1 text-[10px] font-extrabold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                            {{ $p->current_stock }} disponibles
                                         </span>
                                     </button>
                                 @endforeach
+                            </div>
+                        @endif
+
+                        @if(strlen(trim($productSearch)) > 1 && empty($products) && (!$selectedProduct || $productSearch !== $selectedProduct->name))
+                            <div class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200" role="status">
+                                No encontramos productos disponibles que coincidan con <strong>{{ $productSearch }}</strong>. Revisa el nombre o el SKU.
                             </div>
                         @endif
                     </div>

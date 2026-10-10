@@ -118,12 +118,21 @@ class PointOfSale extends Component
         $this->selectedProduct = $product;
         $this->unit_price = $product->price;
         $this->productSearch = $product->name;
+        $this->resetErrorBag('selectedProduct');
+    }
+
+    public function updatedProductSearch($value): void
+    {
+        if (!$this->selectedProduct || $value !== $this->selectedProduct->name) {
+            $this->selectedProduct = null;
+            $this->unit_price = 0;
+        }
     }
 
     public function addItem()
     {
         $productId = data_get($this->selectedProduct, 'id');
-        if (!is_numeric($productId)) {
+        if (!is_numeric($productId) || $this->productSearch !== $this->selectedProduct->name) {
             $this->addError('selectedProduct', 'Seleccione un producto.');
             return;
         }
@@ -484,7 +493,10 @@ class PointOfSale extends Component
                 ->where('company_id', $userCompanyId)
                 ->where('is_active', true)
                 ->where('current_stock', '>', 0)
-                ->where('name', 'like', '%' . $this->productSearch . '%')
+                ->where(function ($query) {
+                    $query->where('name', 'like', '%' . $this->productSearch . '%')
+                        ->orWhere('sku', 'like', '%' . $this->productSearch . '%');
+                })
                 ->limit(5)
                 ->get();
         }

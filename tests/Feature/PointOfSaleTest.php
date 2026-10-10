@@ -1,18 +1,18 @@
 <?php
 
-use App\Mail\AuthorizedInvoiceMail;
 use App\Livewire\ElectronicInvoicing\InvoiceIndex;
 use App\Livewire\Sales\PointOfSale;
+use App\Mail\AuthorizedInvoiceMail;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\User;
-use Livewire\Livewire;
-use Illuminate\Support\Facades\Mail;
 use App\Services\Sri\SriSignatureService;
 use App\Services\Sri\SriWebService;
+use Illuminate\Support\Facades\Mail;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
@@ -52,6 +52,28 @@ test('the cart uses the database price instead of a client supplied price', func
         ->call('addItem')
         ->assertSet('items.0.unit_price', 11.5)
         ->assertSet('items.0.total', 11.5);
+});
+
+test('product search finds products by SKU after the search value changes', function () {
+    $this->actingAs($this->user);
+    $this->product->update(['sku' => 'SKU-CAFE-01']);
+
+    Livewire::test(PointOfSale::class)
+        ->set('productSearch', 'SKU-CAFE-01')
+        ->assertSee('Producto POS')
+        ->assertSee('SKU-CAFE-01');
+});
+
+test('changing the product search clears the previous selection', function () {
+    $this->actingAs($this->user);
+
+    Livewire::test(PointOfSale::class)
+        ->call('selectProduct', $this->product->id)
+        ->set('productSearch', 'Otro producto')
+        ->assertSet('selectedProduct', null)
+        ->call('addItem')
+        ->assertHasErrors('selectedProduct')
+        ->assertSet('items', []);
 });
 
 test('checkout recalculates totals and stock from authoritative records', function () {
