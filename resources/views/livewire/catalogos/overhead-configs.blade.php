@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="app-page-panel p-6">
     <div class="mb-6">
         <flux:heading size="xl">Configuración de Costos e Impuestos</flux:heading>
         <flux:subheading>Define los porcentajes de gastos indirectos y márgenes de utilidad.</flux:subheading>

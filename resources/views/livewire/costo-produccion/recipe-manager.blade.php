@@ -1,5 +1,5 @@
-<div class="p-6">
-    <div class="mb-6 flex justify-between items-end">
+<div class="app-page-panel space-y-6 p-6">
+    <div class="flex items-center justify-between gap-4">
         <div>
             <flux:heading size="xl">Configuración de Receta: {{ $product->name }}</flux:heading>
             <flux:subheading>Define insumos, tiempos de proceso y empaques para el cálculo de costos.</flux:subheading>
@@ -11,7 +11,7 @@
         
         <div class="lg:col-span-2 space-y-6">
             
-            <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
+            <div class="rounded-xl border border-zinc-200 bg-white p-6">
                 <flux:heading size="lg" class="mb-4">1. Definición del Lote (Batch)</flux:heading>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                     <flux:input label="Tamaño del Lote (ml)" type="number" wire:model="batch_size_ml" suffix="ml" />
@@ -20,7 +20,7 @@
             </div>
 
             @if($recipe->exists)
-            <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
+            <div class="rounded-xl border border-zinc-200 bg-white p-6">
                 <flux:heading size="lg" class="mb-4">2. Materias Primas / Ingredientes</flux:heading>
                 <div class="flex gap-4 mb-6 items-end">
                     <div class="flex-1">
@@ -63,18 +63,18 @@
         </div>
 
         <div class="space-y-6">
-            <div class="bg-zinc-900 text-white p-6 rounded-xl shadow-lg border border-zinc-800">
-                <flux:heading size="lg" class="text-white mb-4">Resumen de Costo</flux:heading>
+            <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <flux:heading size="lg" class="mb-4 text-zinc-900">Resumen de Costo</flux:heading>
                 
                 <div class="space-y-3">
-                    <div class="flex justify-between text-zinc-400">
+                    <div class="flex justify-between text-zinc-600">
                         <span>Materia Prima (Lote):</span>
-                        <span class="text-white font-mono">${{ number_format($totalInsumos ?? 0, 2) }}</span>
+                        <span class="font-mono font-semibold text-zinc-900">${{ number_format($totalInsumos ?? 0, 2) }}</span>
                     </div>
-                    <div class="border-t border-zinc-800 my-2"></div>
-                    <div class="flex justify-between text-lg font-bold">
+                    <div class="my-2 border-t border-zinc-200"></div>
+                    <div class="flex justify-between text-lg font-bold text-zinc-900">
                         <span>Costo Total Lote:</span>
-                        <span class="text-emerald-400">${{ number_format($totalInsumos ?? 0, 2) }}</span>
+                        <span class="text-emerald-700">${{ number_format($totalInsumos ?? 0, 2) }}</span>
                     </div>
                     
                     @if($batch_size_ml > 0 && ($product->presentation_ml ?? 0) > 0)
@@ -82,10 +82,10 @@
                         $unidadesPorLote = $batch_size_ml / $product->presentation_ml;
                         $costoUnitario = ($totalInsumos ?? 0) / $unidadesPorLote;
                     @endphp
-                    <div class="bg-zinc-800 p-4 rounded-lg mt-4">
-                        <p class="text-xs text-zinc-500 uppercase">Costo Unitario (Materiales)</p>
-                        <p class="text-2xl font-black text-white">${{ number_format($costoUnitario, 4) }}</p>
-                        <p class="text-xs text-zinc-400">Rinde: {{ number_format($unidadesPorLote, 1) }} unidades</p>
+                    <div class="mt-4 rounded-lg bg-emerald-50 p-4">
+                        <p class="text-xs uppercase text-emerald-800">Costo Unitario (Materiales)</p>
+                        <p class="text-2xl font-black text-zinc-900">${{ number_format($costoUnitario, 4) }}</p>
+                        <p class="text-xs text-zinc-600">Rinde: {{ number_format($unidadesPorLote, 1) }} unidades</p>
                     </div>
                     @endif
                 </div>

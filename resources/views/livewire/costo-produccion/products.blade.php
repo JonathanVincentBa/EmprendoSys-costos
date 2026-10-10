@@ -1,6 +1,6 @@
-<div class="p-6">
+<div class="app-page-panel space-y-6 p-6">
     {{-- Cabecera --}}
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center justify-between gap-4">
         <div>
             <flux:heading size="xl">Productos Finales</flux:heading>
             <flux:subheading>Define tus productos, gestiona su stock elaborado y sus fórmulas de costos.</flux:subheading>
@@ -9,7 +9,7 @@
     </div>
 
     {{-- Card de Contenido --}}
-    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm p-4">
+    <div class="space-y-4 rounded-xl border border-zinc-200 bg-white p-4">
 
         {{-- Buscador --}}
         <div class="flex items-center justify-between mb-4">

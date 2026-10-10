@@ -46,6 +46,8 @@ test('the cart uses the database price instead of a client supplied price', func
     $this->actingAs($this->user);
 
     Livewire::test(PointOfSale::class)
+        ->assertSee('Punto de venta')
+        ->assertSee('Totales de la factura')
         ->call('selectProduct', $this->product->id)
         ->set('unit_price', 0.01)
         ->set('quantity', 1)

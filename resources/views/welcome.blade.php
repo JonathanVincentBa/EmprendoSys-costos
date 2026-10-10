@@ -4,15 +4,15 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="EmprendoSys ayuda a controlar costos de producción, inventario, ventas y facturación electrónica en un solo sistema.">
-        <meta name="theme-color" content="#312e81">
+        <meta name="theme-color" content="#1b2a34">
 
         <title>EmprendoSys | Costos, ventas y facturación en un solo lugar</title>
 
         @vite('resources/css/app.css')
     </head>
-    <body class="bg-white font-sans text-zinc-800 antialiased">
+    <body class="bg-[#edf0f2] font-sans text-zinc-800 antialiased">
         @php
-            $whatsappUrl = 'https://wa.me/593991191755?text=' . rawurlencode('Hola, quiero conocer EmprendoSys y solicitar una demostración.');
+            $whatsappUrl = 'https://wa.me/593995789977?text=' . rawurlencode('Hola, quiero conocer EmprendoSys y solicitar una demostración.');
         @endphp
 
         <header class="sticky top-0 z-50 border-b border-indigo-100/80 bg-white/95 backdrop-blur">
@@ -42,36 +42,36 @@
         </header>
 
         <main>
-            <section class="relative isolate overflow-hidden bg-indigo-950 text-white">
+            <section class="relative isolate overflow-hidden bg-[#1b2a34] text-white">
                 <div aria-hidden="true" class="absolute inset-0 -z-10">
-                    <div class="absolute -right-28 -top-40 h-[34rem] w-[34rem] rounded-full bg-indigo-700/50 blur-3xl"></div>
-                    <div class="absolute -bottom-48 left-1/4 h-[28rem] w-[28rem] rounded-full bg-emerald-500/20 blur-3xl"></div>
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.08)_1px,transparent_0)] bg-[size:28px_28px]"></div>
+                    <div class="absolute -right-28 -top-40 h-[34rem] w-[34rem] rounded-full bg-emerald-500/15 blur-3xl"></div>
+                    <div class="absolute -bottom-48 left-1/4 h-[28rem] w-[28rem] rounded-full bg-emerald-700/15 blur-3xl"></div>
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.07)_1px,transparent_0)] bg-[size:28px_28px]"></div>
                 </div>
 
                 <div class="mx-auto grid max-w-7xl items-center gap-14 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-2 lg:gap-16 lg:py-28">
                     <div class="max-w-2xl">
-                        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-300/25 bg-white/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-indigo-100">
-                            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-emerald-200">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                             Producción · ventas · facturación
                         </div>
-                        <h1 class="text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
+                        <h1 class="text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
                             Tu negocio bajo control.
                             <span class="mt-2 block text-emerald-300">Tus decisiones, con números claros.</span>
                         </h1>
-                        <p class="mt-6 max-w-xl text-lg leading-8 text-indigo-100/85">
+                        <p class="mt-6 max-w-xl text-lg leading-8 text-slate-200">
                             Calcula el costo real de tus productos, administra el inventario y vende desde un punto de venta integrado con facturación electrónica del SRI.
                         </p>
                         <div class="mt-9 flex flex-col gap-3 sm:flex-row">
-                            <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm font-extrabold text-indigo-950 shadow-xl shadow-emerald-950/20 transition hover:-translate-y-0.5 hover:bg-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-200/50">
+                            <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-emerald-900/15 transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200/50">
                                 Solicitar una demostración
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.69L10.22 5.03a.75.75 0 1 1 1.06-1.06l5.5 5.5a.75.75 0 0 1 0 1.06l-5.5 5.5a.75.75 0 1 1-1.06-1.06l4.22-4.22H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
                             </a>
-                            <a href="#beneficios" class="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
+                            <a href="#beneficios" class="inline-flex items-center justify-center rounded-xl border border-white/25 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
                                 Conocer el sistema
                             </a>
                         </div>
-                        <div class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-indigo-100/80">
+                        <div class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-slate-200">
                             <span class="inline-flex items-center gap-2"><span class="text-emerald-300">✓</span> Costos y recetas</span>
                             <span class="inline-flex items-center gap-2"><span class="text-emerald-300">✓</span> Inventario conectado</span>
                             <span class="inline-flex items-center gap-2"><span class="text-emerald-300">✓</span> Facturas PDF y XML</span>
@@ -139,7 +139,7 @@
                 </div>
             </section>
 
-            <section id="beneficios" class="bg-zinc-50 py-20 sm:py-24">
+            <section id="beneficios" class="bg-[#edf0f2] py-20 sm:py-24">
                 <div class="mx-auto max-w-7xl px-5 sm:px-8">
                     <div class="mx-auto max-w-2xl text-center">
                         <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Herramientas para crecer</p>

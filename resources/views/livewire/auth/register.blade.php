@@ -51,7 +51,7 @@
             />
 
             <div class="flex items-center justify-end mt-2">
-                <flux:button type="submit" variant="primary" class="w-full bg-orange-600 hover:bg-orange-500 border-none" data-test="register-user-button">
+                <flux:button type="submit" variant="primary" class="w-full border-none !bg-indigo-700 text-white hover:!bg-indigo-800" data-test="register-user-button">
                     Crear mi cuenta
                 </flux:button>
             </div>

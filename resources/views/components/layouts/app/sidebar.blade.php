@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     @include('partials.head')
@@ -14,7 +14,7 @@
     </style>
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800 antialiased">
+<body class="min-h-screen bg-[#edf0f2] antialiased">
 
     <div class="flex min-h-screen w-full">
 
@@ -22,7 +22,7 @@
              1. SIDEBAR (Escritorio y Tablet)
              =========================================================== --}}
         <flux:sidebar sticky collapsible="mobile"
-            class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+            class="app-sidebar border-e">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
@@ -108,7 +108,7 @@
         {{-- ===========================================================
              2. NAVBAR MÓVIL (Solo visible en pantallas pequeñas)
              =========================================================== --}}
-        <flux:header class="lg:hidden border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:header class="lg:hidden border-b border-[#30414a] bg-[#1b2a34] text-white [&_[data-flux-sidebar-toggle]]:text-white">
             <flux:sidebar.toggle icon="bars-2" />
             <flux:spacer />
             <flux:dropdown aling="end">

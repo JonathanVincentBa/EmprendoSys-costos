@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="app-page-panel p-6">
     <div class="flex justify-between items-center mb-6">
         <div>
             <flux:heading size="xl">Materiales de Empaque</flux:heading>

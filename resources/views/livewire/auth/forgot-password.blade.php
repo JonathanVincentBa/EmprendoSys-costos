@@ -20,7 +20,7 @@
             />
 
             <div class="mt-2">
-                <flux:button variant="primary" type="submit" class="w-full bg-orange-600 hover:bg-orange-500 border-none" data-test="email-password-reset-link-button">
+                <flux:button variant="primary" type="submit" class="w-full border-none !bg-indigo-700 text-white hover:!bg-indigo-800" data-test="email-password-reset-link-button">
                     Enviar enlace de recuperación
                 </flux:button>
             </div>

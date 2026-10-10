@@ -41,7 +41,7 @@
             <flux:checkbox name="remember" label="Recordarme" :checked="old('remember')" />
 
             <div class="flex items-center justify-end mt-2">
-                <flux:button variant="primary" type="submit" class="w-full bg-orange-600 hover:bg-orange-500 border-none" data-test="login-button">
+                <flux:button variant="primary" type="submit" class="w-full border-none !bg-indigo-700 text-white hover:!bg-indigo-800" data-test="login-button">
                     Entrar al Sistema
                 </flux:button>
             </div>
@@ -49,8 +49,8 @@
 
         <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
             ¿Necesitas una cuenta?
-            <a href="https://wa.me/593991191755?text=Hola%2C%20quiero%20solicitar%20acceso%20a%20EmprendoSys"
-                target="_blank" rel="noopener noreferrer" class="font-medium text-emerald-600 hover:underline">
+            <a href="https://wa.me/593995789977?text=Hola%2C%20quiero%20solicitar%20acceso%20a%20EmprendoSys"
+                target="_blank" rel="noopener noreferrer" class="font-bold text-indigo-700 transition hover:text-emerald-700 hover:underline">
                 Solicita acceso por WhatsApp
             </a>
         </div>

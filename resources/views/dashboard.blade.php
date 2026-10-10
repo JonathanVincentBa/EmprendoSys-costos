@@ -1,84 +1,103 @@
 <x-layouts.app :title="config('app.name') . ' - Dashboard'">
-    <div class="flex h-full w-full flex-1 flex-col gap-6 p-6">
-
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-xl">💰</span>
-                    <h3 class="font-bold text-gray-800 dark:text-neutral-200 uppercase tracking-wider text-sm">Ventas de
-                        Hoy</h3>
-                </div>
-                <p class="text-3xl font-black text-neutral-900 dark:text-white mt-4">
-                    ${{ number_format($todaySales ?? 0, 2) }}
-                </p>
-                <p class="text-xs text-gray-500 mt-2 italic">* Solo ventas completadas</p>
-            </div>
-
-            <div
-                class="relative aspect-video rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 flex items-center justify-center">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/10" />
-                <span class="text-gray-400 font-medium">Próxima Métrica</span>
-            </div>
-
-            <div
-                class="relative aspect-video rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 flex items-center justify-center">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/10" />
-                <span class="text-gray-400 font-medium">Próxima Métrica</span>
+    <div class="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col gap-6 p-4 sm:p-6">
+        <div class="relative overflow-hidden rounded-2xl bg-indigo-950 px-6 py-7 text-white shadow-lg shadow-indigo-950/10 sm:px-8">
+            <div aria-hidden="true" class="absolute -right-10 -top-24 h-64 w-64 rounded-full bg-emerald-400/20 blur-3xl"></div>
+            <div class="relative">
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-emerald-300">EmprendoSys · Resumen</p>
+                <h1 class="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Panel de control</h1>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-indigo-100/80">Revisa tus ventas y mantén a la vista los productos que necesitan reposición.</p>
             </div>
         </div>
 
-        <div
-            class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-2">
-                    <span class="text-lg">📢</span>
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-neutral-200">Alertas de Inventario Bajo</h2>
+        <div class="grid gap-4 md:grid-cols-3">
+            <div class="relative overflow-hidden rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div aria-hidden="true" class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-indigo-50"></div>
+                <div class="relative flex items-center gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20m5-15H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </span>
+                    <div>
+                        <h2 class="text-xs font-black uppercase tracking-wider text-zinc-500">Ventas de hoy</h2>
+                        <p class="mt-1 text-xs font-medium text-zinc-400">Ventas completadas</p>
+                    </div>
+                </div>
+                <p class="relative mt-6 text-3xl font-black tracking-tight text-indigo-950">
+                    ${{ number_format($todaySales ?? 0, 2) }}
+                </p>
+            </div>
+
+            <div class="flex items-center gap-4 rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9ZM3.5 7.8 12 12l8.5-4.2M12 12v9"/></svg>
+                </span>
+                <div>
+                    <p class="text-sm font-extrabold text-indigo-950">Inventario conectado</p>
+                    <p class="mt-1 text-sm leading-5 text-zinc-500">Consulta existencias y alertas de stock bajo en tu operación.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 13h6m-6 4h6"/></svg>
+                </span>
+                <div>
+                    <p class="text-sm font-extrabold text-indigo-950">Facturación electrónica</p>
+                    <p class="mt-1 text-sm leading-5 text-zinc-500">Administra el estado de tus comprobantes electrónicos.</p>
+                </div>
+            </div>
+        </div>
+
+        <section class="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm">
+            <div class="flex flex-col gap-3 border-b border-zinc-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 4h.01M10.3 4.8 2.9 17.6A1.6 1.6 0 0 0 4.3 20h15.4a1.6 1.6 0 0 0 1.4-2.4L13.7 4.8a2 2 0 0 0-3.4 0Z"/></svg>
+                    </span>
+                    <div>
+                        <h2 class="text-base font-extrabold text-indigo-950">Alertas de inventario bajo</h2>
+                        <p class="mt-0.5 text-xs text-zinc-500">Productos que requieren atención</p>
+                    </div>
                 </div>
                 @if ($lowStockProducts->isNotEmpty())
-                    <span class="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full uppercase">Acción
-                        Requerida</span>
+                    <span class="inline-flex w-fit items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700">
+                        <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                        {{ $lowStockProducts->count() }} requieren atención
+                    </span>
                 @endif
             </div>
 
             @if ($lowStockProducts->isEmpty())
-                <div class="flex flex-col items-center justify-center py-12 text-gray-400">
-                    <span class="text-4xl mb-2">✅</span>
-                    <p>Todo el inventario está en niveles óptimos.</p>
+                <div class="flex flex-col items-center justify-center px-6 py-14 text-center">
+                    <span class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                        <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6"/></svg>
+                    </span>
+                    <p class="mt-4 text-sm font-bold text-indigo-950">Todo el inventario está en niveles óptimos.</p>
+                    <p class="mt-1 text-xs text-zinc-500">No hay productos por debajo de su stock mínimo.</p>
                 </div>
             @else
-                <div class="overflow-hidden rounded-lg border border-neutral-100 dark:border-neutral-700">
-                    <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-                        <thead class="bg-neutral-50 dark:bg-neutral-900/50">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-zinc-100">
+                        <thead class="bg-zinc-50/80">
                             <tr>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                    Producto</th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                    Empaque</th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                    Stock Actual</th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                    Mínimo</th>
+                                <th class="px-6 py-3.5 text-left text-[11px] font-black uppercase tracking-wider text-zinc-500">Producto</th>
+                                <th class="px-6 py-3.5 text-center text-[11px] font-black uppercase tracking-wider text-zinc-500">Empaque</th>
+                                <th class="px-6 py-3.5 text-center text-[11px] font-black uppercase tracking-wider text-zinc-500">Stock actual</th>
+                                <th class="px-6 py-3.5 text-center text-[11px] font-black uppercase tracking-wider text-zinc-500">Mínimo</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-neutral-100 dark:divide-neutral-700 bg-white dark:bg-transparent">
+                        <tbody class="divide-y divide-zinc-100 bg-white">
                             @foreach ($lowStockProducts as $product)
-                                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-900/20 transition-colors">
-                                    <td class="px-6 py-4 text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                                <tr class="transition-colors hover:bg-indigo-50/40">
+                                    <td class="px-6 py-4 text-sm font-bold text-zinc-800">
                                         {{ $product->name }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-center text-gray-500 uppercase">
+                                    <td class="px-6 py-4 text-center text-xs font-semibold uppercase text-zinc-500">
                                         {{ $product->packaging_type }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-center">
-                                        <span
-                                            class="font-black text-red-600 dark:text-red-400">{{ $product->current_stock }}</span>
+                                    <td class="px-6 py-4 text-center text-sm">
+                                        <span class="inline-flex min-w-10 justify-center rounded-lg bg-red-50 px-2.5 py-1 font-black text-red-700">{{ $product->current_stock }}</span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-center text-gray-400 font-medium">
+                                    <td class="px-6 py-4 text-center text-sm font-semibold text-zinc-500">
                                         {{ $product->minimum_stock_level }}
                                     </td>
                                 </tr>
@@ -87,6 +106,6 @@
                     </table>
                 </div>
             @endif
-        </div>
+        </section>
     </div>
 </x-layouts.app>

@@ -1,14 +1,13 @@
-<div class="space-y-6">
-    <flux:header>
+<div class="app-page-panel space-y-6 p-6">
+    <div class="mb-6 flex items-center justify-between gap-4">
         <div>
-            <flux:heading size="xl underline">Gestión de Usuarios</flux:heading>
-            <flux:subheading>
+            <flux:heading size="xl">Gestión de Usuarios</flux:heading>
+            <flux:subheading class="mt-1">
                 {{ auth()->user()->hasRole('super-admin') ? 'Administración Global de Usuarios' : 'Gestión de Personal de ' . auth()->user()->company->name }}
             </flux:subheading>
         </div>
-        <flux:spacer />
         <flux:button variant="primary" icon="user-plus" wire:click="create">Nuevo Usuario</flux:button>
-    </flux:header>
+    </div>
 
     {{-- Filtros Rápidos --}}
     <div class="flex items-center gap-4">
