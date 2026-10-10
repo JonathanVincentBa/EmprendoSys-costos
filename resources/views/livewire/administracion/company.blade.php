@@ -1,8 +1,8 @@
-<div class="p-6">
-    <div class="mb-6 flex justify-between items-center">
+<div class="app-page-panel space-y-6 p-6">
+    <div class="flex items-center justify-between gap-4">
         <div>
             <flux:heading size="xl">
-                {{ auth()->user()->hasRole('super-admin') ? ($isEditing ? 'Configuración de Empresa' : 'Gestión de Clientes') : 'Mi Empresa' }}
+                {{ auth()->user()->hasRole('super-admin') ? ($isEditing ? 'Configuración de Empresa' : 'Gestión de Empresas') : 'Mi Empresa' }}
             </flux:heading>
             <flux:subheading>Administra la información legal, datos tributarios SRI y firma electrónica para emisión de comprobantes.</flux:subheading>
         </div>
@@ -11,7 +11,7 @@
             @if ($isEditing)
                 <flux:button wire:click="$set('isEditing', false)" variant="subtle" icon="arrow-left">Volver al listado</flux:button>
             @else
-                <flux:button wire:click="createCompany" variant="primary" icon="plus">Nuevo Cliente</flux:button>
+                <flux:button wire:click="createCompany" variant="primary" icon="plus">Nueva Empresa</flux:button>
             @endif
         @endif
     </div>
@@ -107,7 +107,7 @@
                             <p class="text-xs text-zinc-500 mb-4">PNG o JPG cuadrado (Máx. 1MB)</p>
 
                             @if (auth()->user()->hasRole('super-admin'))
-                                <flux:select label="Estado del Cliente" wire:model="status">
+                                <flux:select label="Estado de la Empresa" wire:model="status">
                                     <flux:select.option value="active">Activo (Acceso completo)</flux:select.option>
                                     <flux:select.option value="suspended">Suspendido (Acceso bloqueado)</flux:select.option>
                                 </flux:select>

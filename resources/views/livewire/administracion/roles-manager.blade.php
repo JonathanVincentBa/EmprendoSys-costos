@@ -1,9 +1,9 @@
-<div class="p-6 w-full" x-data="{ modalOpen: false }">
-    <h2 class="text-2xl font-bold mb-6 text-zinc-800 dark:text-white">Gestión de Roles y Permisos</h2>
+<div class="app-page-panel space-y-6 p-6" x-data="{ modalOpen: false }">
+    <flux:heading size="xl">Gestión de Roles y Permisos</flux:heading>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
 
-        <div class="lg:col-span-2 bg-white dark:bg-zinc-900 shadow rounded-lg overflow-hidden border border-zinc-200">
+        <div class="lg:col-span-2 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
             <div class="p-4 border-b flex gap-2">
                 <input type="text" wire:model="newPermission" placeholder="Nuevo permiso..."
                     class="border p-2 rounded flex-1">
@@ -43,7 +43,7 @@
             </table>
         </div>
 
-        <div class="bg-zinc-50 p-4 rounded-lg border">
+        <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
             <h3 class="font-bold mb-4">Roles Disponibles</h3>
             @foreach ($roles as $role)
                 <button wire:click="selectRole({{ $role->id }})" @click="modalOpen = true"

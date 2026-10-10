@@ -46,6 +46,17 @@ test('admin can access operational modules for their company', function () {
 test('super admin can manage companies but not company profile route', function () {
     $user = createAuthorizedUser('super-admin');
 
-    $this->actingAs($user)->get('/admin/companies')->assertOk();
+    $this->actingAs($user)->get('/admin/companies')
+        ->assertOk()
+        ->assertSee('Gestión de Empresas')
+        ->assertSee('Nueva Empresa')
+        ->assertSee('app-page-panel')
+        ->assertDontSee('Gestión de Clientes');
+
+    $this->actingAs($user)->get('/admin/roles')
+        ->assertOk()
+        ->assertSee('Gestión de Roles y Permisos')
+        ->assertSee('app-page-panel');
+
     $this->actingAs($user)->get('/company-profile')->assertForbidden();
 });
